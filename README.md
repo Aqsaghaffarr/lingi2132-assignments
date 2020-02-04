@@ -1,2 +1,2 @@
-# lingi2132-assignments
-Assignments for LINGI2132
+# Assignments for LINGI2132
+
