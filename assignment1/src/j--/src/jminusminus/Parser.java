@@ -1116,7 +1116,7 @@ public class Parser {
      * 
      * <pre>
      *   multiplicativeExpression ::= unaryExpression  // level 2
-     *                                  {STAR unaryExpression}
+     *                                  {(STAR | DIV) unaryExpression}
      * </pre>
      * 
      * @return an AST for a multiplicativeExpression.
@@ -1129,6 +1129,8 @@ public class Parser {
         while (more) {
             if (have(STAR)) {
                 lhs = new JMultiplyOp(line, lhs, unaryExpression());
+            } else if (have(DIV)) {
+            	lhs = new JDivideOp(line, lhs, unaryExpression());
             } else {
                 more = false;
             }

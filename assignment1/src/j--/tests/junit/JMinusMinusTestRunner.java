@@ -20,6 +20,7 @@ public class JMinusMinusTestRunner {
         suite.addTestSuite(FactorialTest.class);
         suite.addTestSuite(SeriesTest.class);
         suite.addTestSuite(ClassesTest.class);
+        suite.addTestSuite(DivisionTest.class);
         return suite;
     }
 
