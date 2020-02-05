@@ -1,0 +1,3 @@
+\begin{Verbatim}[commandchars=\\\{\}]
+\PYG{n}{Scanner}\PYG{o}{.}\PYG{n+na}{getNextToken}\PYG{o}{()}
+\end{Verbatim}
