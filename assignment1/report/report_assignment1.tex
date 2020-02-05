@@ -8,15 +8,12 @@
 
 \usepackage[T1]{fontenc}
 \usepackage[utf8]{inputenc}
-\usepackage[french]{babel}
+\usepackage[english]{babel}
 \usepackage{graphicx}
 \usepackage{subcaption}
-\usepackage{csquotes}
 \usepackage{mathtools,amssymb}
 \usepackage[binary-units=true,separate-uncertainty = true,multi-part-units=single]{siunitx}
 \usepackage{float}
-\usepackage[linktoc=all]{hyperref}
-\hypersetup{breaklinks=true}
 \setlength{\parskip}{1ex plus 0.5ex minus 0.2ex}
 \newcommand{\hsp}{\hspace{20pt}}
 \newcommand{\HRule}{\rule{\linewidth}{0.5mm}}
@@ -28,16 +25,50 @@
 \usepackage{tabularx,booktabs}
 \usepackage{titlesec}
 \usepackage{wrapfig}
-\titlespacing{\section}{0pt}{\parskip}{-\parskip}
-\titlespacing{\subsection}{0pt}{\parskip}{-\parskip}
-\titlespacing{\subsubsection}{0pt}{\parskip}{-\parskip}
+%\titlespacing{\section}{0pt}{\parskip}{-\parskip}
+%\titlespacing{\subsection}{0pt}{\parskip}{-\parskip}
+%\titlespacing{\subsubsection}{0pt}{\parskip}{-\parskip}
 \pagestyle{fancy}
-\DeclarePairedDelimiterX{\norm}[1]{\lVert}{\rVert}{#1}
 \usepackage{minted}
-\DeclareMathOperator{\dens}{\mathrm{dens}}
+\usepackage{csquotes}
+\usepackage[linktoc=all]{hyperref}
+\hypersetup{breaklinks=true}
 
 \begin{document}
-div: same as in book
+\section{Division}
+The division operator is implemented as described in Chapter 1.5 of \cite{compilers}.
 
-rem: same as div (replacing operators ofc) , except for scanner, where the procedure is different due to the \% symbol not having a special meaning (/ can mean a comment is starting -> add it more traditionally, analoguous to *)
+\section{Remainder}
+The remainder operator is implemented analoguously to the division operator, with the only real difference being that in \mintinline{java}{Scanner.getNextToken()}, the ``\mintinline{java}{%}'' token does not need to be treated separately, whereas the division symbol could indicate the start of a comment and special care needs to be taken.
+For this reason, the code in this part was based on how multiplication is handled.
+
+\section{Unary Addition}
+The unary addition operator is implemented analoguously to the unary negation operator, which was already present in the code.
+Its main difference from the binary operators described above is that instead of working in the \texttt{JBinaryExpression.java} file, changes need to be made to \texttt{JUnaryExpression.java}.
+There is no dedicated JVM instruction for unary addition (contrary to unary negation, which uses \texttt{INEG}); for this reason, we use the \texttt{NOP} instruction, which does nothing.
+
+\section{Palindrome}
+To check a string for palindromicity, one possible algorithm traverses the string in both directions simultaneously, continuing as long as both traversed parts are the same.
+If these substrings differ at some point, the function outputs an empty string and terminates, otherwise it continues until the pointers meet, and outputs the original string.
+As discussed in \cite{complexity}, this algorithm is optimal, from a complexity point of view.
+One thing to be mindful of is potential case issues; to handle this, the string is converted to lower case before performing the comparison.
+
+In order to check whether the middle of the string has been reached, the less-than operator (\(<\)) had to be implemented, which was done similarly to the greater-than operator which was already present in the code base.
+Tests were also written for this operator.
+
+
+palindrome: similar to intfactorial, helloworld, http://componentsprogramming.com/palindromes/, make sure to convert to lower case before comparing. needs less than.
+
+\begin{thebibliography}{9}
+	\bibitem{compilers}
+	Bill Campbell, Swami Iyer, and Bahar Akbal-Deliba\c s.
+	\textit{Introduction to Compiler Construction in a Java World}.
+	Chapman and Hall/CRC, Boca Raton, Florida, 2012.
+	
+	\bibitem{complexity}
+	Fernando Pelliccioni.
+	\href{http://componentsprogramming.com/palindromes/}{\textit{Palindromes and more}}.
+	Components Programming, 2016.
+\end{thebibliography}
+
 \end{document}

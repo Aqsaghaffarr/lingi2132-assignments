@@ -23,6 +23,8 @@ public class JMinusMinusTestRunner {
         suite.addTestSuite(DivisionTest.class);
         suite.addTestSuite(RemainderTest.class);
         suite.addTestSuite(UnaryAdditionTest.class);
+        suite.addTestSuite(LessThanTest.class);
+        suite.addTestSuite(PalindromeTest.class);
         return suite;
     }
 

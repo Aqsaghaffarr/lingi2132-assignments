@@ -1063,7 +1063,7 @@ public class Parser {
      * 
      * <pre>
      *   relationalExpression ::= additiveExpression  // level 5
-     *                              [(GT | LE) additiveExpression 
+     *                              [(GT | LT | LE) additiveExpression 
      *                              | INSTANCEOF referenceType]
      * </pre>
      * 
@@ -1075,6 +1075,8 @@ public class Parser {
         JExpression lhs = additiveExpression();
         if (have(GT)) {
             return new JGreaterThanOp(line, lhs, additiveExpression());
+        } else if (have(LT)) {
+        	return new JLessThanOp(line, lhs, additiveExpression());
         } else if (have(LE)) {
             return new JLessEqualOp(line, lhs, additiveExpression());
         } else if (have(INSTANCEOF)) {

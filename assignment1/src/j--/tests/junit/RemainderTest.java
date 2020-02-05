@@ -23,5 +23,7 @@ public class RemainderTest extends TestCase
 		this.assertEquals(remainder.takeRemainder(0, 42), 0);
 		this.assertEquals(remainder.takeRemainder(3, 42), 3);
 		this.assertEquals(remainder.takeRemainder(127, 3), 1);
+		this.assertEquals(remainder.takeRemainder(6, 2), 0);
+		this.assertEquals(remainder.takeRemainder(5, 3), 2);
 	}
 }

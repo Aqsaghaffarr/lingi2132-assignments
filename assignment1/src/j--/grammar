@@ -79,7 +79,7 @@ equalityExpression ::= relationalExpression  // level 6
                          {EQUAL relationalExpression}
 
 relationalExpression ::= additiveExpression       // level 5
-                           [(GT | LE) additiveExpression
+                           [(GT | LT | LE) additiveExpression
                            | INSTANCEOF referenceType]
 
 additiveExpression ::= multiplicativeExpression // level 3
