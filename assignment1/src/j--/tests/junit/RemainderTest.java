@@ -18,7 +18,7 @@ public class RemainderTest extends TestCase
 		super.tearDown();
 	}
 	
-	public void testDivide()
+	public void testRemainder()
 	{
 		this.assertEquals(remainder.takeRemainder(0, 42), 0);
 		this.assertEquals(remainder.takeRemainder(3, 42), 3);
