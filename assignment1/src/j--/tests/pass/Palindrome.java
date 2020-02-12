@@ -21,7 +21,7 @@ public class Palindrome {
 	    	}
 	    	++i;
 	    }
-	    return s;    
+	    return s;
 	}
 
     public static void main(String[] args) {
