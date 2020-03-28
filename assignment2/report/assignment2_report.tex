@@ -1,0 +1,62 @@
+\documentclass[11pt]{article}
+\usepackage[a4paper,left=1.5cm,right=1.5cm,top=1.5cm,bottom=1.5cm]{geometry}
+\usepackage{fancyhdr}
+\renewcommand{\headrulewidth}{1pt}
+\fancyhead[C]{\textbf{[LINGI2132] Languages \& Translators}}
+\fancyhead[L]{Assignment 2}
+\fancyhead[R]{Group 55}
+
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[english]{babel}
+\usepackage[nounderscore]{syntax}
+\let\syntleft\relax
+\let\syntright\relax
+\setlength{\grammarindent}{3.5em}
+\usepackage{graphicx}
+\usepackage{subcaption}
+\usepackage{mathtools,amssymb, mathrsfs,amsthm}
+\usepackage[binary-units=true,separate-uncertainty = true,multi-part-units=single]{siunitx}
+\usepackage{float}
+\setlength{\parskip}{1ex plus 0.5ex minus 0.2ex}
+\newcommand{\hsp}{\hspace{20pt}}
+\newcommand{\HRule}{\rule{\linewidth}{0.5mm}}
+\graphicspath{{img/}}
+\usepackage{caption}
+\usepackage{textcomp}
+\usepackage{array}
+\usepackage{color}
+\usepackage{tabularx,booktabs}
+\usepackage{titlesec}
+\usepackage{wrapfig}
+\titlespacing{\section}{0pt}{\parskip}{-\parskip}
+\titlespacing{\subsection}{0pt}{\parskip}{-\parskip}
+\titlespacing{\subsubsection}{0pt}{\parskip}{-\parskip}
+\pagestyle{fancy}
+\usepackage{minted}
+\usepackage{csquotes}
+\usepackage[linktoc=all]{hyperref}
+\hypersetup{breaklinks=true}
+\usepackage{tikz}
+\usetikzlibrary{automata,positioning}
+\DeclareMathOperator{\first}{first}
+\DeclareMathOperator{\follow}{follow}
+\newcommand{\id}{\mathrm{id}}
+\newcommand{\E}{\textnormal{E}}
+\newcommand{\Ep}{\textnormal{E'}}
+\newcommand{\T}{\textnormal{T}}
+\newcommand{\Tp}{\textnormal{T'}}
+\newcommand{\F}{\textnormal{F}}
+\renewcommand{\epsilon}{\varepsilon}
+\renewcommand{\theta}{\vartheta}
+\renewcommand{\kappa}{\varkappa}
+\renewcommand{\rho}{\varrho}
+\renewcommand{\phi}{\varphi}
+\usepackage{import}
+\newcommand{\orc}{\mathbin{\mathrm{or}}}
+\newcommand{\andc}{\mathbin{\mathrm{and}}}
+\newcommand{\notc}{\mathop{\mathrm{not}}}
+
+\begin{document}
+\import{../rec_descent/}{LL1_grammar.tex}
+\end{document}

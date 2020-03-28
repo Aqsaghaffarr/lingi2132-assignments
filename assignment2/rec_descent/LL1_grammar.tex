@@ -1,0 +1,14 @@
+\section{Recursive Descent -- LL(\(1\)) Grammar}
+The grammar given on INGInious needs to be modified in order to not be left-recursive.
+This can be done as follows:
+\begin{grammar}
+	<E> ::= TE'
+	
+	<E'> ::= \(\orc\) TE' | \(\epsilon\)
+	
+	<T> ::= FT'
+	
+	<T'> ::= \(\andc\) FT' | \(\epsilon\)
+	
+	<F> ::= \(\notc\) F | (E) | id
+\end{grammar}
