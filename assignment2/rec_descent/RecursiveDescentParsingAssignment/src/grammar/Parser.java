@@ -31,30 +31,25 @@ public class Parser {
 
 	// Rows:    E, E', T, T', F.
 	// Columns: or, and, not, (, ), id, #
-	public final int[][] table = new int[][]{
+	private final int[][] table = new int[][]{
 			{-1, -1,  0,  0, -1,  0, -1},
 			{ 1, -1, -1, -1,  2, -1,  2},
 			{-1, -1,  3,  3, -1,  3, -1},
 			{ 5,  4, -1, -1,  5, -1,  5},
 			{-1, -1,  6,  7, -1,  8, -1}};
 
-	public final static String HASH = "#";
-
-
+	private final static String HASH = "#";
 
 	public boolean parse(String[] input) {
-		Stack<String> inp = new Stack<>();
-		inp.push("#");
-		for (int i = input.length - 1; i >= 0; i--) {
-			inp.push(input[i]);
-		}
-		Stack<String> S = new Stack<>();
+		Deque<String> S = new ArrayDeque<>();
 		S.push("#");
 		S.push("E");
-		int state = 0;
-		String s = inp.peek();
-		while (!inp.isEmpty()) {
+		int state;
+		int index = 0;
+		// System.out.println("Input: " + Arrays.toString(input) + "\n");
+		while (index < input.length) {
 			// Match top of stack.
+			// System.out.println("Current stack: " + S + "\nInput left: " + Arrays.toString(Arrays.copyOfRange(input, index, input.length)) + "\n");
 			String alpha = S.pop();
 			int row = -1;
 			boolean consume = false;
@@ -75,14 +70,15 @@ public class Parser {
 					row = 4;
 					break;
 				default:
-					if (alpha.equals(HASH)) return true; // Both characters are equal to the end of input.
+					if (S.isEmpty()) return false;
 					consume = true;
+					index++;
 					break;
 			}
 
 			// Match start of input string.
 			if (!consume) {
-				switch (s) {
+				switch (input[index]) {
 					case OR:
 						state = table[row][0];
 						break;
@@ -104,7 +100,10 @@ public class Parser {
 					case HASH:
 						state = table[row][6];
 						break;
+					default:
+						return false;
 				}
+
 				// Apply grammar rule.
 				if (state == -1) return false;
 
@@ -117,8 +116,7 @@ public class Parser {
 					case 1:
 						S.push("E'");
 						S.push("T");
-						inp.pop();
-						s = inp.peek();
+						index++;
 						break;
 					case 2:
 						break;
@@ -129,49 +127,52 @@ public class Parser {
 					case 4:
 						S.push("T'");
 						S.push("F");
-						inp.pop();
-						s = inp.peek();
+						index++;
 						break;
 					case 5:
 						break;
 					case 6:
 						S.push("F");
-						inp.pop();
-						s = inp.peek();
+						index++;
 						break;
 					case 7:
 						S.push(")");
 						S.push("E");
-						inp.pop();
-						s = inp.peek();
+						index++;
 						break;
 					case 8:
-						inp.pop();
-						s = inp.peek();
+						index++;
 						break;
 					default:
 						return false;
 				}
 			}
 		}
-		return S.isEmpty();
+
+		// See if we can reduce stack to "#".
+		while (!S.isEmpty()) {
+			String alpha = S.pop();
+			if (alpha.equals(HASH)) return true;
+			if (!(alpha.equals("E'") || alpha.equals("T'"))) return false;
+		}
+		return false; // Never reached.
 	}
 
 	/*
 	public static void main(String[] args) {
 		Generator g = new Generator(69);
 		Parser p = new Parser();
-		int maxDepth = 100;
+		int maxDepth = 1;
 		for (int i = 0; i < 1; i++) {
 			String[] s = g.generate(maxDepth);
+			System.out.println("Input of length " + s.length + " generated\n");
 			long st = System.currentTimeMillis();
-			System.out.println(p.parse(s));
-			// System.out.println(Arrays.toString(s) + ": " + p.parse(s) + "\n");
-			System.out.println(System.currentTimeMillis() - st);
+			System.out.println("Result: " + p.parse(s));
+			System.out.println("Time: " + (System.currentTimeMillis() - st) + "\n\n");
 		}
 
 		String[] s = new String[]{"not"};
-		System.out.println(Arrays.toString(s) + ": " + p.parse(s) + "\n");
+		System.out.println("Result: " + p.parse(s));
 	}
 	 */
 }
