@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.19 (TeX Live 2018) (preloaded format=pdflatex 2019.3.24)  25 MAR 2020 01:30
+This is pdfTeX, Version 3.14159265-2.6-1.40.19 (TeX Live 2018) (preloaded format=pdflatex 2019.3.24)  28 MAR 2020 19:27
 entering extended mode
  \write18 enabled.
  %&-line parsing enabled.
@@ -1607,7 +1607,7 @@ Package rerunfilecheck Info: File `answers.out' has not changed.
 Here is how much of TeX's memory you used:
  34558 strings out of 492649
  689039 string characters out of 6129622
- 827273 words of memory out of 5000000
+ 827274 words of memory out of 5000000
  37915 multiletter control sequences out of 15000+600000
  544018 words of font info for 59 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
@@ -1626,7 +1626,7 @@ texlive/2018/texmf-dist/fonts/type1/public/rsfs/rsfs10.pfb></usr/local/texlive/
 /texmf-dist/fonts/type1/public/cm-super/sfbx1440.pfb></usr/local/texlive/2018/t
 exmf-dist/fonts/type1/public/cm-super/sfrm1095.pfb></usr/local/texlive/2018/tex
 mf-dist/fonts/type1/public/cm-super/sfti1095.pfb>
-Output written on answers.pdf (4 pages, 167458 bytes).
+Output written on answers.pdf (4 pages, 167442 bytes).
 PDF statistics:
  148 PDF objects out of 1000 (max. 8388607)
  127 compressed objects within 2 object streams
