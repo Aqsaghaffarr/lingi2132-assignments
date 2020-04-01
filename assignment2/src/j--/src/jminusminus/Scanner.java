@@ -105,7 +105,22 @@ class Scanner {
                     while (ch != '\n' && ch != EOFCH) {
                         nextCh();
                     }
-                } else {
+                } 
+                else if (ch == '*') {
+                	nextCh();
+                	while (ch != EOFCH) {
+                		if (ch == '*') {
+                			nextCh();
+                			if (ch == '/') {
+                				break;
+                			}
+                		}
+                		else {
+                			nextCh();
+                		}
+                    }
+                }
+                else {
                     reportScannerError("Operator / is not supported in j--.");
                 }
             } else {

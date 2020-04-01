@@ -121,7 +121,7 @@ public class Parser {
      * Pull out the ambiguous part of a name and return it.
      * 
      * @param name
-     *            with an ambiguos part (possibly).
+     *            with an ambiguous part (possibly).
      * @return ambiguous part or null.
      */
 
