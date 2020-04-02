@@ -67,6 +67,9 @@
 \newcommand{\notc}{\mathop{\mathrm{not}}}
 \definecolor{codegreen}{rgb}{0.25,0.5,0.35}    % comments
 \definecolor{codepurple}{rgb}{0.5,0,0.35}      % keywords
+\makeatletter
+\def\blfootnote{\gdef\@thefnmark{}\@footnotetext}
+\makeatother
 
 \begin{document}
 \import{../rec_descent/}{LL1_grammar.tex}
@@ -78,12 +81,10 @@ A \java{CLEmitter} uses an \java{ArrayList} to store the various instructions th
 Similarly to how this was done in the provided examples of \java{CLEmitter} usage on the lecture slides and in the \texttt{tests/clemitter} folder, the class is created using the \java{addClass} method, and an implicit no-arg constructor is added.
 For the \java{gcd} method, \java{ClassToGenerate} mainly uses \jvm{iload_0}, \jvm{iload_1} (to load the first and second arguments, resp.), \jvm{istore_0}, \jvm{istore_1} (to (over)write the first and second arguments, resp.), as well as the \jvm{isub} command to subtract two numbers.
 These are all called using \java{CLEmitters}'s \java{addNoArgInstruction} method.
+\blfootnote{Gilles Peiffer (24321600), Liliya Semerikova (64811600)}
 
 In order to implement the various control structures (the \java{while} loop and \java{if} block), \java{CLEmitter} has an \java{addBranchInstruction} method, which takes a first argument with the branch instruction to execute (\jvm{goto} or \jvm{if_icmple}), and a second argument with the name of the label to which one needs to branch.
 Labels can be specified using \java{CLEmitter}'s \java{addLabel} instruction, which takes a \java{String} as argument.
-
-To test the correctness of the \java{Generator} class, one can use the Fernflower (or any other) decompiler, which translates a compiled class file into a regular java file.
-This output can then be compared with the original java file.
 
 \section{Lexical Analysis}
 \subsection{Hand-written Compiler}
@@ -99,10 +100,65 @@ SKIP: \{"/*": IN\_BLOCK\_COMMENT\}\\
 < IN\_BLOCK\_COMMENT > SKIP: \{"*/": DEFAULT\}}
 
 It works as follows: when the start of a block comment is matched in the  \texttt{DEFAULT} state, it is skipped and the state is switched to \texttt{IN\_BLOCK\_COMMENT}.
-Any other character seen in this new state is skipped, unless the JavaCC sees the end of a block comment, in which case this is skipped and the state is switched back to \texttt{DEFAULT}.
-
-\subsection{Tests}
-In order to test whether this works correctly, multi-line comments to a test file, and we verified everything was still compiling correctly.
+Any other character seen in this new state is skipped, unless JavaCC sees the end of a block comment, in which case this is skipped and the state is switched back to \texttt{DEFAULT}.
 
 \section{Parsing and Semantic Analysis}
+\subsection{Hand-written Compiler}
+\subsubsection{Conditional-or (\java{||})}
+In order to implement the conditional-or expression in the hand-written compiler, a few tweaks needed to be made.
+Logical precedence entails that the conditional-or expression would have lower priority than the conditional-and expression which already existed.
+This meant that any lower priority expression using conditional-and expressions would now have to use conditional-or expressions, which in turn are made up of conditional-and expressions separated by ``\java{||}''. The implementation for this expression was very similar to the one for the conditional-and expression, once this priority-related issue was resolved.
+Changes were made in
+\begin{itemize}
+	\item the \java{TokenKind} \java{enum}, to which one needed to add a new kind of token (\java{LOR("||")});
+	\item the \java{Scanner} class (where one simply needed to add a possibility to the \java{getNextToken} method);
+	\item the \java{Parser} class (where a new \java{conditionalOrExpression} method was added);
+	\item the \java{JBooleanBinaryExpression} class was extended with a class for logical-or operations, \java{JLogicalOrOp}.
+\end{itemize}
+\subsubsection{Do-while (\java{do {} while ();})}
+Adding the \java{do while} control structure was made easier thanks to its similarity with the existing \java{while} structure.
+The only difference between the two is that the body of the former is always executed at least once, whereas for the latter this is not the case. The implementation thus consisted in changing the following:
+\begin{itemize}
+	\item the \java{TokenKind} \java{enum}, to which one needed to add a new kind of token (\java{DO("do")});
+	\item the \java{Scanner} class (to define the new \java{do} keyword);
+	\item the \java{Parser} class (where another possibility was added to the  \java{statement} method);
+	\item the \java{JDoWhileStatement} was added, which is based on the \java{JWhileStatement} class but reflects their structural differences.
+\end{itemize}
+
+\subsection{JavaCC Compiler}
+Fundamentally, the changes to implement these operations on the JavaCC compiler were exactly the same as the ones for the hand-written compiler, except for the fact they are all localized in the \texttt{j-\(\)-.jj} file.
+
+\subsubsection{Conditional-or (\java{||})}
+As before, a new operator (\texttt{< LOR: "||" >}) was defined, and a new function \texttt{conditionalOrExpression} was added to represent conditional-or expressions (and their precedence with respect to other expressions).
+
+\subsubsection{Do-while (\java{do {} while ();})}
+To implement the \java{do while} statement with JavaCC, \java{do} was declared as a reserved word, and a new possibility was added to the \texttt{statement} function for the \java{do while} statement.
+
+\section{Tests}
+To test the correctness of the \java{Generator} class, one can use the Fernflower (or any other) decompiler, which translates a compiled class file into a regular java file.
+This output can then be compared with the original java file.
+The \mintinline{bash}{javap} command provides a similar (though more rudimental) functionality.
+
+In order to test whether the new language constructs work, tests were added in a similar manner to the one explained in Chapter~1.5 of \cite{compilers}, for each functionality: ``pass'' tests allowing one to check whether execution behaves as expected, and ``fail'' tests to verify compilation stops graciously in case of errors.
+Test files are provided in \texttt{pass/MultilineComment.java}, \texttt{pass/Or.java}, \texttt{pass/DoWhile.java}, \texttt{junit/OrTest.java}, \texttt{junit/DoWhile.java}, \texttt{fail/OrErrors.java}, \texttt{fail/DoWhileErrors.java}, and the test suite provided in \texttt{junit/JMinusMinusTestRunner.java} was extended accordingly.
+
+\section{Updated Grammar}
+The changes to the \texttt{j-\(\)-} grammar can be summarized as follows:
+\begin{itemize}
+	\item Block comments were added, which can be represented by the following JavaCC-style regex:
+	\newline``\texttt{"/*" (\(\sim\)["*"])* "*" (\(\sim\)["*","/"] (\(\sim\)["*"])* "*" | "*")* "/"}''.
+	\item The conditional-or expression was added, which has precedence level 11 and can be represented as
+	\newline``\texttt{conditionalOrExpression ::= conditionalAndExpression {LOR conditionalAndExpression}}''.
+	\item The \java{do while} statement was added, which can be represented as 
+	\newline``\texttt{DO statement WHILE parExpression SEMI}''.
+\end{itemize}
+
+\begin{thebibliography}{9}
+	\bibitem{compilers}
+	Bill Campbell, Swami Iyer, and Bahar Akbal-Deliba\c s.
+	\textit{Introduction to Compiler Construction in a Java World}.
+	Chapman and Hall/CRC, Boca Raton, Florida, 2012.
+\end{thebibliography}
+
+
 \end{document}
