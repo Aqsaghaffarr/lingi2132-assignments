@@ -113,6 +113,7 @@ class Scanner {
                 		if (ch == '*') {
                 			nextCh();
                 			if (ch == '/') {
+                				nextCh();
                 				break;
                 			}
                 		} else {
