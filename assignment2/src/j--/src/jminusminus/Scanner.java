@@ -60,6 +60,7 @@ class Scanner {
         reserved.put(BOOLEAN.image(), BOOLEAN);
         reserved.put(CHAR.image(), CHAR);
         reserved.put(CLASS.image(), CLASS);
+        reserved.put(DO.image(), DO);
         reserved.put(ELSE.image(), ELSE);
         reserved.put(EXTENDS.image(), EXTENDS);
         reserved.put(FALSE.image(), FALSE);
@@ -114,8 +115,7 @@ class Scanner {
                 			if (ch == '/') {
                 				break;
                 			}
-                		}
-                		else {
+                		} else {
                 			nextCh();
                 		}
                     }
@@ -185,6 +185,15 @@ class Scanner {
                 return new TokenInfo(DEC, line);
             } else {
                 return new TokenInfo(MINUS, line);
+            }
+        case '|':
+            nextCh();
+            if (ch == '|') {
+                nextCh();
+                return new TokenInfo(LOR, line);
+            } else {
+                reportScannerError("Operator | is not supported in j--.");
+                return getNextToken();
             }
         case '&':
             nextCh();
@@ -353,7 +362,7 @@ class Scanner {
     }
 
     /**
-     * Report a lexcial error and record the fact that an error has occured.
+     * Report a lexical error and record the fact that an error has occurred.
      * This fact can be ascertained from the Scanner by sending it an
      * errorHasOccurred() message.
      * 

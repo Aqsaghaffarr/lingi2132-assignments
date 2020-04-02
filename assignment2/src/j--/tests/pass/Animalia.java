@@ -1,7 +1,5 @@
 // Copyright 2013 Bill Campbell, Swami Iyer and Bahar Akbal-Delibas
 
-/* caca */
-
 package pass;
 
 import java.lang.System;

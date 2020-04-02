@@ -142,15 +142,15 @@ SKIP: {" "|"\t"|"\n"|"\r"|"\f"}
 // Single line comment -- ignored
 SKIP: {<SINGLE_LINE_COMMENT: "//" (~["\n","\r"])* ("\n"|"\r"|"\r\n")>}
 
-// Multi line comments -- ignored.
+// Multi-line comments -- ignored.
 // There are two solutions: first, with a regex:
 // SKIP: {<MULTI_LINE_COMMENT: "/*" (~["*"])* "*" (~["*","/"] (~["*"])* "*" | "*")* "/">}
 // Second: the solution using lexical states:
 // When a /* is seen in the DEFAULT state, skip it and switch to the IN_BLOCK_COMMENT state.
-MORE: {"/*": IN_BLOCK_COMMENT}
+SKIP: {"/*": IN_BLOCK_COMMENT}
 
 // When any other character is seen in the IN_BLOCK_COMMENT state, skip it.
-< IN_BLOCK_COMMENT > MORE: {< ~[] >}
+< IN_BLOCK_COMMENT > SKIP: {< ~[] >}
 
 // When a */ is seen in the IN_BLOCK_COMMENT state, skip it and switch back to the DEFAULT state.
 < IN_BLOCK_COMMENT > SKIP: {"*/": DEFAULT}
@@ -162,6 +162,7 @@ TOKEN:
 | < BOOLEAN: "boolean" >
 | < CHAR: "char" >
 | < CLASS: "class" >
+| < DO: "do" >
 | < ELSE: "else" >
 | < EXTENDS: "extends" >
 | < FALSE: "false" >
@@ -193,6 +194,7 @@ TOKEN:
 | < EQUAL: "==" >
 | < GT: ">" >
 | < INC: "++" >
+| < LOR: "||" >
 | < LAND: "&&" >
 | < LE: "<=" >
 | < LNOT: "!" >
@@ -651,7 +653,8 @@ private JStatement blockStatement(): {
  * <pre>
  *   statement ::= block
  *               | IF parExpression statement [ELSE statement]
- *               | WHILE parExpression statement 
+ *               | WHILE parExpression statement
+ *               | DO statement WHILE parExpression SEMI
  *               | RETURN [expression] SEMI
  *               | SEMI 
  *               | statementExpression SEMI
@@ -690,6 +693,12 @@ private JStatement statement(): {
         test = parExpression() 
         body = statement()
         { statement = new JWhileStatement( line, test, body ); } |
+        <DO> { line = token.beginLine; }
+        body = statement()
+        <WHILE>
+        test = parExpression()
+        <SEMI>
+        { statement = new JDoWhileStatement( line, test, body ); } |
         <RETURN> { line = token.beginLine; }
         [ 
             expr = expression() 
@@ -1141,7 +1150,7 @@ private JExpression expression(): {
  * 
  * <pre>
  *   assignmentExpression ::= 
- *       conditionalAndExpression // level 13
+ *       conditionalOrExpression // level 13
  *           [( ASSIGN  // conditionalExpression
  *            | PLUS_ASSIGN // must be valid lhs
  *            )
@@ -1157,7 +1166,7 @@ private JExpression assignmentExpression(): {
 }
 {
     try {
-        lhs = conditionalAndExpression() { line = lhs.line(); }
+        lhs = conditionalOrExpression() { line = token.beginLine; }
         [       
             <ASSIGN> 
             rhs = assignmentExpression()
@@ -1174,6 +1183,36 @@ private JExpression assignmentExpression(): {
 }
 
 /**
+ * Parse a conditional-or expression.
+ * 
+ * <pre>
+ *   conditionalOrExpression ::= conditionalAndExpression // level 11
+ *                                  {LOR ConditionalAndExpression}
+ * </pre>
+ * 
+ * @return an AST for a conditionalOrExpression.
+ */
+
+private JExpression conditionalOrExpression(): {
+    int line = 0;
+    JExpression lhs = null, rhs = null;
+}
+{
+    try {
+        lhs = conditionalAndExpression() { line = token.beginLine; }
+        ( 
+            <LOR>
+            rhs = conditionalAndExpression()
+            { lhs = new JLogicalOrOp( line, lhs, rhs ); }
+        )*
+    } 
+    catch ( ParseException e ) {
+        recoverFromError( new int[] { SEMI, EOF }, e ); 
+    }
+    { return lhs; }
+}
+
+/**
  * Parse a conditional-and expression.
  * 
  * <pre>
@@ -1181,7 +1220,7 @@ private JExpression assignmentExpression(): {
  *                                  {LAND equalityExpression}
  * </pre>
  * 
- * @return an AST for a conditionalExpression.
+ * @return an AST for a conditionalAndExpression.
  */
 
 private JExpression conditionalAndExpression(): {
@@ -1190,7 +1229,7 @@ private JExpression conditionalAndExpression(): {
 }
 {
     try {
-        lhs = equalityExpression() { line = lhs.line(); }
+        lhs = equalityExpression() { line = token.beginLine; }
         ( 
             <LAND>
             rhs = equalityExpression()
@@ -1220,7 +1259,7 @@ private JExpression equalityExpression(): {
 }
 {
     try {
-        lhs = relationalExpression() { line = lhs.line(); }
+        lhs = relationalExpression() { line = token.beginLine; }
         ( 
             <EQUAL> 
             rhs = relationalExpression()
@@ -1252,7 +1291,7 @@ private JExpression relationalExpression(): {
 }
 {
     try {
-        lhs = additiveExpression() { line = lhs.line(); }
+        lhs = additiveExpression() { line = token.beginLine; }
         [ 
             <GT> 
             rhs = additiveExpression()
@@ -1288,7 +1327,7 @@ private JExpression additiveExpression(): {
 }
 {
     try {
-        lhs = multiplicativeExpression() { line = lhs.line(); } 
+        lhs = multiplicativeExpression() { line = token.beginLine; } 
         ( 
             <PLUS> 
             rhs = multiplicativeExpression()
@@ -1321,7 +1360,7 @@ private JExpression multiplicativeExpression(): {
 }
 {
     try {
-        lhs = unaryExpression() { line = lhs.line(); }
+        lhs = unaryExpression() { line = token.beginLine; }
         ( 
             <STAR> 
             rhs = unaryExpression()

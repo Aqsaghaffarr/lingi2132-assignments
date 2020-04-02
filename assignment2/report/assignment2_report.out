@@ -1,5 +1,7 @@
 \BOOKMARK [1][-]{section.1}{Recursive Descent \205 LL\(1\) Grammar}{}% 1
-\BOOKMARK [1][-]{section.2}{Programming directly in Java bytecode}{}% 2
+\BOOKMARK [1][-]{section.2}{Programming Directly in Java Bytecode}{}% 2
 \BOOKMARK [1][-]{section.3}{Lexical Analysis}{}% 3
-\BOOKMARK [2][-]{subsection.3.1}{Hand-written compiler}{section.3}% 4
-\BOOKMARK [2][-]{subsection.3.2}{JavaCC compiler}{section.3}% 5
+\BOOKMARK [2][-]{subsection.3.1}{Hand-written Compiler}{section.3}% 4
+\BOOKMARK [2][-]{subsection.3.2}{JavaCC Compiler}{section.3}% 5
+\BOOKMARK [2][-]{subsection.3.3}{Tests}{section.3}% 6
+\BOOKMARK [1][-]{section.4}{Parsing and Semantic Analysis}{}% 7

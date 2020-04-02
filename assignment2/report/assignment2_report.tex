@@ -71,7 +71,7 @@
 \begin{document}
 \import{../rec_descent/}{LL1_grammar.tex}
 
-\section{Programming directly in Java bytecode}
+\section{Programming Directly in Java Bytecode}
 Using \java{CLEmitter}, it is quite simple to create a ``hand-written'' class file.
 In order to specify the output directory for the generated file, one can use the \java{destinationDir} method.
 A \java{CLEmitter} uses an \java{ArrayList} to store the various instructions that are needed.
@@ -86,18 +86,23 @@ To test the correctness of the \java{Generator} class, one can use the Fernflowe
 This output can then be compared with the original java file.
 
 \section{Lexical Analysis}
-\subsection{Hand-written compiler}
+\subsection{Hand-written Compiler}
 In the \java{Scanner}, skipping over block comments is done by first detecting the start of a block comment in the \java{getNextToken} method.
 Once this has been detected, one enters a \java{while} loop which exits as soon as the end of the block comment has been detected.
 
-\subsection{JavaCC compiler}
+\subsection{JavaCC Compiler}
 Using JavaCC and lexical states, a neat solution is the following:
 
 \noindent\texttt{
-MORE: \{"/*": IN\_BLOCK\_COMMENT\}\\
-< IN\_BLOCK\_COMMENT > MORE: \{< \(\sim\)[] >\}\\
+SKIP: \{"/*": IN\_BLOCK\_COMMENT\}\\
+< IN\_BLOCK\_COMMENT > SKIP: \{< \(\sim\)[] >\}\\
 < IN\_BLOCK\_COMMENT > SKIP: \{"*/": DEFAULT\}}
 
-It works as follows: when the start of a block comment is matched in the  \texttt{DEFAULT} state, it is skipped and the state is swtiched to \texttt{IN\_BLOCK\_COMMENT}.
+It works as follows: when the start of a block comment is matched in the  \texttt{DEFAULT} state, it is skipped and the state is switched to \texttt{IN\_BLOCK\_COMMENT}.
 Any other character seen in this new state is skipped, unless the JavaCC sees the end of a block comment, in which case this is skipped and the state is switched back to \texttt{DEFAULT}.
+
+\subsection{Tests}
+In order to test whether this works correctly, multi-line comments to a test file, and we verified everything was still compiling correctly.
+
+\section{Parsing and Semantic Analysis}
 \end{document}

@@ -20,7 +20,7 @@ public class Parser {
     /** Whether a parser error has been found. */
     private boolean isInError;
 
-    /** Wheter we have recovered from a parser error. */
+    /** Whether we have recovered from a parser error. */
     private boolean isRecovered;
 
     /**
@@ -632,7 +632,8 @@ public class Parser {
      * <pre>
      *   statement ::= block
      *               | IF parExpression statement [ELSE statement]
-     *               | WHILE parExpression statement 
+     *               | WHILE parExpression statement
+     *               | DO statement WHILE parExpression SEMI
      *               | RETURN [expression] SEMI
      *               | SEMI 
      *               | statementExpression SEMI
@@ -654,6 +655,12 @@ public class Parser {
             JExpression test = parExpression();
             JStatement statement = statement();
             return new JWhileStatement(line, test, statement);
+        } else if (have(DO)) {
+            JStatement statement = statement();
+            mustBe(WHILE);
+            JExpression test = parExpression();
+            mustBe(SEMI);
+            return new JDoWhileStatement(line, test, statement);
         } else if (have(RETURN)) {
             if (have(SEMI)) {
                 return new JReturnStatement(line, null);
@@ -986,7 +993,7 @@ public class Parser {
      * 
      * <pre>
      *   assignmentExpression ::= 
-     *       conditionalAndExpression // level 13
+     *       conditionalOrExpression // level 13
      *           [( ASSIGN  // conditionalExpression
      *            | PLUS_ASSIGN // must be valid lhs
      *            )
@@ -998,7 +1005,7 @@ public class Parser {
 
     private JExpression assignmentExpression() {
         int line = scanner.token().line();
-        JExpression lhs = conditionalAndExpression();
+        JExpression lhs = conditionalOrExpression();
         if (have(ASSIGN)) {
             return new JAssignOp(line, lhs, assignmentExpression());
         } else if (have(PLUS_ASSIGN)) {
@@ -1006,6 +1013,31 @@ public class Parser {
         } else {
             return lhs;
         }
+    }
+    
+    /**
+     * Parse a conditional-or expression.
+     * 
+     * <pre>
+     *   conditionalOrExpression ::= conditionalAndExpression // level 11
+     *                                  {LOR conditionalAndExpression}
+     * </pre>
+     * 
+     * @return an AST for a conditionalOrExpression.
+     */
+
+    private JExpression conditionalOrExpression() {
+        int line = scanner.token().line();
+        boolean more = true;
+        JExpression lhs = conditionalAndExpression();
+        while (more) {
+            if (have(LOR)) {
+                lhs = new JLogicalOrOp(line, lhs, conditionalAndExpression());
+            } else {
+                more = false;
+            }
+        }
+        return lhs;
     }
 
     /**
@@ -1016,7 +1048,7 @@ public class Parser {
      *                                  {LAND equalityExpression}
      * </pre>
      * 
-     * @return an AST for a conditionalExpression.
+     * @return an AST for a conditionalAndExpression.
      */
 
     private JExpression conditionalAndExpression() {

@@ -1,9 +1,5 @@
 // Copyright 2013 Bill Campbell, Swami Iyer and Bahar Akbal-Delibas
 
-/*
- * Just testing whether block comments work now.
- */
-
 package pass;
 
 import java.lang.System;

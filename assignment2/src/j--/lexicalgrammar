@@ -8,13 +8,16 @@
 "//" {~("\n"|"\r")} ("\n"|"\r"["\n"])
 
 // Multi-line comment -- ignored
-"/*" (~["*"])* "*" (~["*","/"] (~["*"])* "*" | "*")* "/"
+SKIP: {"/*": IN_BLOCK_COMMENT}
+< IN_BLOCK_COMMENT > SKIP: {< ~[] >}
+< IN_BLOCK_COMMENT > SKIP: {"*/": DEFAULT}
 
 // Reserved words
 ABSTRACT    ::= "abstract"
 BOOLEAN     ::= "boolean"
 CHAR        ::= "char"
 CLASS       ::= "class"
+DO          ::= "do"
 ELSE        ::= "else"
 EXTENDS     ::= "extends"
 FALSE       ::= "false"
@@ -41,6 +44,7 @@ ASSIGN      ::= "="
 EQUAL       ::= "=="
 GT          ::= ">"
 INC         ::= "++"
+LOR         ::= "||"
 LAND        ::= "&&"
 LE          ::= "<="
 LNOT        ::= "!"
