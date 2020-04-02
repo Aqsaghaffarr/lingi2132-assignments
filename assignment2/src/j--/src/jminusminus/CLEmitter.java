@@ -1266,7 +1266,7 @@ public class CLEmitter {
      *   ASTORE_0, ASTORE_1, ASTORE_2, ASTORE_3, ICONST_0, ICONST_1, 
      *   ICONST_2, ICONST_3, ICONST_4, ICONST_5, ICONST_M1, LCONST_0, 
      *   LCONST_1, FCONST_0, FCONST_1, FCONST_2, DCONST_0, DCONST_1, 
-     *   ACONST_NULL, WIDE (added automatically where necesary)
+     *   ACONST_NULL, WIDE (added automatically where necessary)
      * </pre>
      * 
      * <p/>
