@@ -142,8 +142,18 @@ SKIP: {" "|"\t"|"\n"|"\r"|"\f"}
 // Single line comment -- ignored
 SKIP: {<SINGLE_LINE_COMMENT: "//" (~["\n","\r"])* ("\n"|"\r"|"\r\n")>}
 
-// Multi line comments -- ignored
-SKIP: {<MULTI_LINE_COMMENT: "/*" (~["*"])* "*" (~["*","/"] (~["*"])* "*" | "*")* "/">}
+// Multi line comments -- ignored.
+// There are two solutions: first, with a regex:
+// SKIP: {<MULTI_LINE_COMMENT: "/*" (~["*"])* "*" (~["*","/"] (~["*"])* "*" | "*")* "/">}
+// Second: the solution using lexical states:
+// When a /* is seen in the DEFAULT state, skip it and switch to the IN_BLOCK_COMMENT state.
+MORE: {"/*": IN_BLOCK_COMMENT}
+
+// When any other character is seen in the IN_BLOCK_COMMENT state, skip it.
+< IN_BLOCK_COMMENT > MORE: {< ~[] >}
+
+// When a */ is seen in the IN_BLOCK_COMMENT state, skip it and switch back to the DEFAULT state.
+< IN_BLOCK_COMMENT > SKIP: {"*/": DEFAULT}
 
 // Reserved words
 TOKEN:
