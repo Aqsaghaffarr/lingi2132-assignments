@@ -10,6 +10,7 @@
 \usepackage[utf8]{inputenc}
 \usepackage[english]{babel}
 \usepackage[nounderscore]{syntax}
+\usepackage{listings}
 \let\syntleft\relax
 \let\syntright\relax
 \setlength{\grammarindent}{3.5em}
@@ -34,6 +35,14 @@
 \titlespacing{\subsubsection}{0pt}{\parskip}{-\parskip}
 \pagestyle{fancy}
 \usepackage{minted}
+\newcommand{\java}[1]{\mintinline{java}{#1}}
+\lstdefinestyle{myjvm}{basicstyle=\ttfamily,
+	language=JVMIS,
+	morekeywords={if_icmple},
+	keywordstyle=\color{codepurple},
+	stringstyle=\color{codegreen}
+}
+\newcommand{\jvm}[1]{\lstinline[style=myjvm]|#1|}
 \usepackage{csquotes}
 \usepackage[linktoc=all]{hyperref}
 \hypersetup{breaklinks=true}
@@ -56,7 +65,39 @@
 \newcommand{\orc}{\mathbin{\mathrm{or}}}
 \newcommand{\andc}{\mathbin{\mathrm{and}}}
 \newcommand{\notc}{\mathop{\mathrm{not}}}
+\definecolor{codegreen}{rgb}{0.25,0.5,0.35}    % comments
+\definecolor{codepurple}{rgb}{0.5,0,0.35}      % keywords
 
 \begin{document}
 \import{../rec_descent/}{LL1_grammar.tex}
+
+\section{Programming directly in Java bytecode}
+Using \java{CLEmitter}, it is quite simple to create a ``hand-written'' class file.
+In order to specify the output directory for the generated file, one can use the \java{destinationDir} method.
+A \java{CLEmitter} uses an \java{ArrayList} to store the various instructions that are needed.
+Similarly to how this was done in the provided examples of \java{CLEmitter} usage on the lecture slides and in the \texttt{tests/clemitter} folder, the class is created using the \java{addClass} method, and an implicit no-arg constructor is added.
+For the \java{gcd} method, \java{ClassToGenerate} mainly uses \jvm{iload_0}, \jvm{iload_1} (to load the first and second arguments, resp.), \jvm{istore_0}, \jvm{istore_1} (to (over)write the first and second arguments, resp.), as well as the \jvm{isub} command to subtract two numbers.
+These are all called using \java{CLEmitters}'s \java{addNoArgInstruction} method.
+
+In order to implement the various control structures (the \java{while} loop and \java{if} block), \java{CLEmitter} has an \java{addBranchInstruction} method, which takes a first argument with the branch instruction to execute (\jvm{goto} or \jvm{if_icmple}), and a second argument with the name of the label to which one needs to branch.
+Labels can be specified using \java{CLEmitter}'s \java{addLabel} instruction, which takes a \java{String} as argument.
+
+To test the correctness of the \java{Generator} class, one can use the Fernflower (or any other) decompiler, which translates a compiled class file into a regular java file.
+This output can then be compared with the original java file.
+
+\section{Lexical Analysis}
+\subsection{Hand-written compiler}
+In the \java{Scanner}, skipping over block comments is done by first detecting the start of a block comment in the \java{getNextToken} method.
+Once this has been detected, one enters a \java{while} loop which exits as soon as the end of the block comment has been detected.
+
+\subsection{JavaCC compiler}
+Using JavaCC and lexical states, a neat solution is the following:
+
+\noindent\texttt{
+MORE: \{"/*": IN\_BLOCK\_COMMENT\}\\
+< IN\_BLOCK\_COMMENT > MORE: \{< \(\sim\)[] >\}\\
+< IN\_BLOCK\_COMMENT > SKIP: \{"*/": DEFAULT\}}
+
+It works as follows: when the start of a block comment is matched in the  \texttt{DEFAULT} state, it is skipped and the state is swtiched to \texttt{IN\_BLOCK\_COMMENT}.
+Any other character seen in this new state is skipped, unless the JavaCC sees the end of a block comment, in which case this is skipped and the state is switched back to \texttt{DEFAULT}.
 \end{document}
