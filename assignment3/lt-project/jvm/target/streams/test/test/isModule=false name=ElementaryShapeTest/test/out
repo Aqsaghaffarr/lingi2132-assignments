@@ -1,0 +1,6 @@
+[0m[[0m[0minfo[0m] [0m[0m[32mElementaryShapeTest:[0m[0m
+[0m[[0m[0minfo[0m] [0m[0m[32m- Move rectangle up[0m[0m
+[0m[[0m[0minfo[0m] [0m[0m[32m- Move circle left[0m[0m
+[0m[[0m[0minfo[0m] [0m[0m[32m- Change color of rectangle via keyword[0m[0m
+[0m[[0m[0minfo[0m] [0m[0m[32m- Change color of circle via property[0m[0m
+[0m[[0m[0minfo[0m] [0m[0m[32m- Change radius in rectangle[0m[0m

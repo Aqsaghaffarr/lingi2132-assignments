@@ -1,0 +1,7 @@
+[0m[[0m[0mdebug[0m] [0m[0m[watch] [projectsJS / Compile / fastOptJS] Found inputs: /Users/admin/Documents/Master/M1/q2/lingi2132/lingi2132-assignments/assignment3/lt-project/js/*.{java,scala},/Users/admin/Documents/Master/M1/q2/lingi2132/lingi2132-assignments/assignment3/lt-project/js/src/main/java/**/*.{java,scala},/Users/admin/Documents/Master/M1/q2/lingi2132/lingi2132-assignments/assignment3/lt-project/js/src/main/resources/**/*,/Users/admin/Documents/Master/M1/q2/lingi2132/lingi2132-assignments/assignment3/lt-project/js/src/main/scala/**/*.{java,scala},/Users/admin/Documents/Master/M1/q2/lingi2132/lingi2132-assignments/assignment3/lt-project/js/src/main/scala-2.13/**/*.{java,scala},/Users/admin/Documents/Master/M1/q2/lingi2132/lingi2132-assignments/assignment3/lt-project/shared/src/main/scala/**/*.{java,scala},/Users/admin/Documents/Master/M1/q2/lingi2132/lingi2132-assignments/assignment3/lt-project/shared/src/main/scala-2.13/**/*.{java,scala}[0m
+[0m[[0m[0mdebug[0m] [0m[0m[watch] [projectsJVM / fastOptJS] Found inputs: [0m
+[0m[[0m[0mdebug[0m] [0m[0m[watch] [root / fastOptJS] Found inputs: [0m
+[0m[[0m[0minfo[0m] [0m[0m1. Monitoring source files for root/fastOptJS...[0m
+[0m[[0m[0minfo[0m] [0m[0m   Press <enter> to interrupt or '?' for more options.[0m
+[0m[[0m[0mdebug[0m] [0m[0m[watch] [debug] Received input event: Run().[0m
+[0m[[0m[0mdebug[0m] [0m[0m[watch] [debug] Received input event: Run().[0m
