@@ -45,7 +45,7 @@ class ComposedShapeTest extends AnyFunSuite with Matchers {
   test("change Radius on ComposedShape of Rectangles") {
     val l = newRectangleList()
     val g = ComposedShape(l)
-    "g change Radius(40)" shouldNot typeCheck
+    "g change Radius(40)" shouldNot compile
   }
 
 }

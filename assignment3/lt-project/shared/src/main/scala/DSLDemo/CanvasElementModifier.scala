@@ -7,11 +7,11 @@ trait CanvasElementModifier[-ApplyOn <: Shape] {
 }
 
 
-case class Color(c: String) extends CanvasElementModifier[Shape] {
+case class Color(col: String) extends CanvasElementModifier[Shape] {
   override def change(x: Shape): Unit = {
     x match {
-      case r: Rectangle  => r.color(c)
-      case t: Circle => t.color(c)
+      case r: Rectangle  => r.color(col)
+      case c: Circle => c.color(col)
     }
   }
 }
@@ -21,7 +21,7 @@ case class StrokeWidth(n: Int) extends CanvasElementModifier[Shape] {
   override def change(x: Shape): Unit = {
     x match {
       case r: Rectangle => r.strokeWidth(n)
-      case t: Circle => t.strokeWidth(n)
+      case c: Circle => c.strokeWidth(n)
     }
   }
 }

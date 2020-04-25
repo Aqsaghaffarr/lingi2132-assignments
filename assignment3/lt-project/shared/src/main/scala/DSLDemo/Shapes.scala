@@ -1,6 +1,7 @@
 package DSLDemo
 
 import java.awt.Canvas
+
 import scala.collection.Iterable
 
 
@@ -24,8 +25,8 @@ sealed trait ShapeAttributes {
   var color: String = "red"
   var strokeWidth: Int = 1
 
-  def color(c: String): Unit = {
-    color = c
+  def color(col: String): Unit = {
+    color = col
   }
 
   def strokeWidth(n: Int): Unit = {
@@ -68,6 +69,30 @@ case class ComposedShape(var l: List[Shape]) extends Shape {
 
   override def moveY(v: Int): Unit = {
     l.foreach(s => s.moveY(v))
+  }
+
+  def change(property: Radius): Unit = {
+    for (x <- l) {
+      x match {
+        case c: Circle => c.change(property)
+      }
+    }
+  }
+
+  def change(property: Width): Unit = {
+    for (x <- l) {
+      x match {
+        case r: Rectangle => r.change(property)
+      }
+    }
+  }
+
+  def change(property: Height): Unit = {
+    for (x <- l) {
+      x match {
+        case r: Rectangle => r.change(property)
+      }
+    }
   }
 
   override def change(property: CanvasElementModifier[A]): Unit = {
