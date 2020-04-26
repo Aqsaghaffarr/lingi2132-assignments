@@ -11,7 +11,7 @@ class ElementaryShapeTest extends AnyFunSuite with Matchers {
 
   Random.setSeed(183945)
 
-  test("Move rectangle up") {
+  test("move rectangle up") {
     val offSet = Random.nextInt(20)
     val rectangle = newRectangle()
     val expected = rectangle.y - offSet
@@ -19,7 +19,7 @@ class ElementaryShapeTest extends AnyFunSuite with Matchers {
     rectangle.y shouldBe expected
   }
 
-  test("Move circle left") {
+  test("move circle left") {
     val offSet = Random.nextInt(20)
     val circle = newCircle()
     val expected = circle.x - offSet
@@ -27,24 +27,23 @@ class ElementaryShapeTest extends AnyFunSuite with Matchers {
     circle.x shouldBe expected
   }
 
-  test("Change color of rectangle via keyword") {
+  test("change color of rectangle via keyword") {
     val rectangle = newRectangle()
     val newColor = s"rgb ${Random.nextInt(255)} ${Random.nextInt(255)} ${Random.nextInt(255)}"
     rectangle change Color(newColor)
     rectangle.color shouldBe newColor
   }
 
-  test("Change color of circle via property") {
+  test("change color of circle via property") {
     val circle = newCircle()
     val newColor = s"rgb ${Random.nextInt(255)} ${Random.nextInt(255)} ${Random.nextInt(255)}"
     circle change Color(newColor)
     circle.color shouldBe newColor
   }
 
-  test("Change radius in rectangle") {
+  test("change radius in rectangle") {
     val offSet = Random.nextInt(20)
     val rectangle = newRectangle()
     assertTypeError("rectangle change Radius(40)")
   }
-
 }

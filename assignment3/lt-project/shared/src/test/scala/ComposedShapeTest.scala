@@ -11,7 +11,7 @@ class ComposedShapeTest extends AnyFunSuite with Matchers {
 
   Random.setSeed(947693)
 
-  test("Moving a group of shapes up") {
+  test("moving a group of shapes up") {
     val l = newRectangleList()
     val g = ComposedShape(l)
     val offSet = Random.nextInt(20)
@@ -42,10 +42,36 @@ class ComposedShapeTest extends AnyFunSuite with Matchers {
     }
   }
 
-  test("change Radius on ComposedShape of Rectangles") {
-    val l = newRectangleList()
+  test("change width on ComposedShape of rectangles") {
+    val l = newRectangleList(0, 0, 10, 20, 10)
     val g = ComposedShape(l)
-    "g change Radius(40)" shouldNot compile
+    g change Width(40)
+    for (i <- l.indices) {
+      assert(g(i).asInstanceOf[Rectangle].width != 10)
+    }
   }
 
+  test("change height on ComposedShape of rectangles") {
+    val l = newRectangleList(0, 0, 10, 20, 10)
+    val g = ComposedShape(l)
+    g change Height(40)
+    for (i <- l.indices) {
+      assert(g(i).asInstanceOf[Rectangle].width != 20)
+    }
+  }
+
+  test("change radius on ComposedShape of rectangles") {
+    val l = newRectangleList()
+    val g = ComposedShape(l)
+    assertTypeError("g change Radius(40)")
+  }
+
+  test("change property on ComposedShape of rectangle and circle") {
+    val r = Rectangle(10, 20, 40, 40)
+    val c = Circle(0, 0, 10)
+    val g = ComposedShape(List(r, c))
+    assertTypeError("g change Radius(30)")
+    assertTypeError("g change Height(30)")
+    assertTypeError("g change Width(30)")
+  }
 }

@@ -12,6 +12,10 @@ object Common {
     Rectangle(x, y, width, height)
   }
 
+  def newRectangle(x: Int, y: Int, w: Int, h: Int) : Rectangle = {
+    Rectangle(x, y, w, h)
+  }
+
   def newCircle() : Circle = {
     val x = Random.nextInt(100)
     val y  = Random.nextInt(100)
@@ -26,6 +30,10 @@ object Common {
 
   def newRectangleList(size: Int): List[Rectangle] = {
     List.fill(size)(newRectangle())
+  }
+
+  def newRectangleList(x: Int, y: Int, w: Int, h: Int, size: Int): List[Rectangle] = {
+    List.fill(size)(newRectangle(x, y, w, h))
   }
 
   def newCircleList(): List[Circle] = {
