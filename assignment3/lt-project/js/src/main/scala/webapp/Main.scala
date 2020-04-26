@@ -14,7 +14,6 @@ object Main {
     canvas.width = w
     canvas.height = w
     scalaJSDemo(canvas)
-
   }
 
   def scalaJSDemo(c: html.Canvas): Unit = {
@@ -39,7 +38,7 @@ object Main {
   /*
    * TODO: When you've done the first part, you should be able to uncomment this
    *       method and call it without problems :-)
-   *
+   */
   def useMySuperDSL(canvas: html.Canvas): Unit = {
     // After you've done the first part of the project, everything should
     // compile and do the expected behaviour
@@ -58,13 +57,14 @@ object Main {
 
     // We should also be able to do the same on a group of shapes
     // (list, array, iterables, ...)
-    circles moveX 20
+    print(circles.isInstanceOf[Array[Circle]])
+    //circles moveX 20
 
     // We can also change property using the CanvasElementModifier trait
-    circles change Color("blue")
+    //circles change Color("blue")
 
     // We can group the shapes easily with the keyword and
-    val superGroupOfShapes = circles and rectangles
+    //val superGroupOfShapes = circles and rectangles
 
     // And of course, we have foreach/map/flatmap available
     (rectangles(0) and circles(1)).foreach(_ moveY 30)
@@ -82,6 +82,5 @@ object Main {
     // You can have a nice draw function to draw all of this on the canvas
     canvasy.draw()
   }
-  */
 
 }
