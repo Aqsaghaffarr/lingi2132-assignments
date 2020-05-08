@@ -1,6 +1,5 @@
 package DSLDemo
 
-
 import scala.collection.Iterable
 
 
@@ -76,4 +75,25 @@ case class Circle(var x: Int, var y: Int, var radius: Int) extends Shape with Sh
   override def moveY(v: Int): Unit = y += v
 
   override def change(property: CanvasElementModifier[A]): Unit = property.change(this)
+
+}
+
+object Extends {
+
+  implicit class shapeArrayExtend[T <: Shape](s: Array[T]) {
+
+    type A = T
+
+    def moveX(i: Int): Unit = {
+      s.foreach(sh => sh.moveX(i))
+    }
+
+    def moveY(i: Int): Unit = {
+      s.foreach(sh => sh.moveY(i))
+    }
+
+    def change(property: CanvasElementModifier[A]): Unit = {
+      s.foreach(sh => property.change(sh))
+    }
+  }
 }

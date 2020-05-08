@@ -3,6 +3,7 @@ package webapp
 import DSLDemo._
 import org.scalajs.dom.{html, document}
 import org.scalajs.dom
+import DSLDemo.Extends._
 
 object Main {
 
@@ -13,7 +14,7 @@ object Main {
     val w = 300
     canvas.width = w
     canvas.height = w
-    scalaJSDemo(canvas)
+    useMySuperDSL(canvas)
   }
 
   def scalaJSDemo(c: html.Canvas): Unit = {
@@ -44,7 +45,7 @@ object Main {
     // compile and do the expected behaviour
     val canvasy = new Canvasy(canvas)
 
-    val circles = Array.fill(4)(Circle(50, 0, 0))
+    val circles = Array.fill(4)(Circle(50, 100, 100))
     val rectangles = Array.tabulate(5)(i => Rectangle(i*10, i*10, 10, 30))
 
     canvasy += circles
@@ -58,10 +59,10 @@ object Main {
     // We should also be able to do the same on a group of shapes
     // (list, array, iterables, ...)
     print(circles.isInstanceOf[Array[Circle]])
-    //circles moveX 20
+    circles moveX 20
 
     // We can also change property using the CanvasElementModifier trait
-    //circles change Color("blue")
+    circles change Color("blue")
 
     // We can group the shapes easily with the keyword and
     //val superGroupOfShapes = circles and rectangles
