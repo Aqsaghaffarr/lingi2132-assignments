@@ -93,7 +93,11 @@ object Extends {
     }
 
     def change(property: CanvasElementModifier[A]): Unit = {
-      s.foreach(sh => property.change(sh))
+      s.foreach(x => x.change(property.asInstanceOf[CanvasElementModifier[x.A]]))
+    }
+
+    implicit def and[U <: Shape](shape: Array[U]): ComposedShape[Shape] = {
+      ComposedShape(s.toList) and ComposedShape(shape.toList)
     }
   }
 }

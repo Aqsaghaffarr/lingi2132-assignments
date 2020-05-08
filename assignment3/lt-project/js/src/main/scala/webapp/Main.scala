@@ -65,7 +65,7 @@ object Main {
     circles change Color("blue")
 
     // We can group the shapes easily with the keyword and
-    //val superGroupOfShapes = circles and rectangles
+    val superGroupOfShapes = circles and rectangles
 
     // And of course, we have foreach/map/flatmap available
     (rectangles(0) and circles(1)).foreach(_ moveY 30)
