@@ -14,7 +14,7 @@ object Main {
     val w = 300
     canvas.width = w
     canvas.height = w
-    useMySuperDSL(canvas)
+    scalaJSDemo(canvas)
   }
 
   def scalaJSDemo(c: html.Canvas): Unit = {
@@ -38,7 +38,7 @@ object Main {
 
   /*
    * TODO: When you've done the first part, you should be able to uncomment this
-   *       method and call it without problems :-)
+   *       method and call it without problems
    */
   def useMySuperDSL(canvas: html.Canvas): Unit = {
     // After you've done the first part of the project, everything should
@@ -83,5 +83,4 @@ object Main {
     // You can have a nice draw function to draw all of this on the canvas
     canvasy.draw()
   }
-
 }
