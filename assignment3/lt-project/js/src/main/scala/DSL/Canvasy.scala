@@ -27,22 +27,18 @@ class Canvasy(canvas: html.Canvas) {
         ctx.strokeStyle = w.color
         ctx.lineWidth = w.strokeWidth
         ctx.fillRect(w.x, w.y, w.width, w.height)
-        ctx.fillStyle = w.color
       case a: Apple =>
         ctx.strokeStyle = a.color
         ctx.lineWidth = a.strokeWidth
         ctx.strokeRect(a.x, a.y, a.width, a.height)
-        ctx.fillStyle = a.color
       case e: Empty =>
         ctx.strokeStyle = e.color
         ctx.lineWidth = e.strokeWidth
         ctx.strokeRect(e.x, e.y, e.width, e.height)
-        ctx.fillStyle = e.color
       case s: Snake =>
         ctx.strokeStyle = s.color
         ctx.lineWidth = s.strokeWidth
         ctx.strokeRect(s.x, s.y, s.width, s.height)
-        ctx.fillStyle = s.color
       case _ => throw new UnsupportedOperationException
     }
   }

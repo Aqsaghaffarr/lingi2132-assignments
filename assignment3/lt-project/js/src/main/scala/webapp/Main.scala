@@ -20,77 +20,34 @@ object Main {
   }
 
   def useGameDSL(canvas: html.Canvas): Unit = {
-
     val canvasy = new Canvasy(canvas)
 
-    """walls"""
+    // walls
     val walls_top = Array.tabulate(20)(i => Wall(0, i*20, 20, 20))
-    val walls_bottom = Array.tabulate(20)(i => Wall(i*20, 0, 20, 20))
-    val walls_right = Array.tabulate(20)(i => Wall(380, i*20, 20, 20))
-    val walls_left = Array.tabulate(20)(i => Wall(i*20, 400, 20, 20))
+    val walls_right = Array.tabulate(18)(i => Wall((i+1)*20, 0, 20, 20))
+    val walls_bottom = Array.tabulate(20)(i => Wall(380, i*20, 20, 20))
+    val walls_left = Array.tabulate(18)(i => Wall((i+1)*20, 380, 20, 20))
 
     walls_top change Color("black")
     walls_bottom change Color("black")
     walls_right change Color("black")
     walls_left change Color("black")
 
-    """field"""
-    var field : Array[Empty] = new Array[Empty](400)
-    for (i <- 0 until 20 ){
-      for (j <- 1 until 20 ){
-        field(i*20 + j) = Empty(j*20, i*20, 20, 20)
-      }
-    }
-
-
-    val field_1 = Array.tabulate(20)(i => Empty(20, i*20, 20, 20))
-    val field_2 = Array.tabulate(20)(i => Empty(40, i*20, 20, 20))
-    val field_3 = Array.tabulate(20)(i => Empty(60, i*20, 20, 20))
-    val field_4 = Array.tabulate(20)(i => Empty(80, i*20, 20, 20))
-    val field_5 = Array.tabulate(20)(i => Empty(100, i*20, 20, 20))
-    val field_6 = Array.tabulate(20)(i => Empty(120, i*20, 20, 20))
-    val field_7 = Array.tabulate(20)(i => Empty(140, i*20, 20, 20))
-    val field_8 = Array.tabulate(20)(i => Empty(160, i*20, 20, 20))
-    val field_9 = Array.tabulate(20)(i => Empty(180, i*20, 20, 20))
-    val field_10 = Array.tabulate(20)(i => Empty(200, i*20, 20, 20))
-    val field_11 = Array.tabulate(20)(i => Empty(220, i*20, 20, 20))
-    val field_12 = Array.tabulate(20)(i => Empty(240, i*20, 20, 20))
-    val field_13 = Array.tabulate(20)(i => Empty(260, i*20, 20, 20))
-    val field_14 = Array.tabulate(20)(i => Empty(280, i*20, 20, 20))
-    val field_15 = Array.tabulate(20)(i => Empty(300, i*20, 20, 20))
-    val field_16 = Array.tabulate(20)(i => Empty(320, i*20, 20, 20))
-    val field_17 = Array.tabulate(20)(i => Empty(340, i*20, 20, 20))
-    val field_18 = Array.tabulate(20)(i => Empty(360, i*20, 20, 20))
-
-    /*val apple = Apple(50, 50, 10, 10)
-
-    apple change Color("green")*/
-
     canvasy += walls_top
     canvasy += walls_bottom
     canvasy += walls_right
     canvasy += walls_left
-    canvasy += field_1
-    canvasy += field_2
-    canvasy += field_3
-    canvasy += field_4
-    canvasy += field_5
-    canvasy += field_6
-    canvasy += field_7
-    canvasy += field_8
-    canvasy += field_9
-    canvasy += field_10
-    canvasy += field_11
-    canvasy += field_12
-    canvasy += field_13
-    canvasy += field_14
-    canvasy += field_15
-    canvasy += field_16
-    canvasy += field_17
-    canvasy += field_18
-    /*canvasy += apple*/
+
+    // field
+    val field : Array[Array[Empty]] = new Array[Array[Empty]](18)
+    for (i <- 0 until 18) {
+      field(i) = Array.tabulate(18)(j => Empty((i+1)*20, (j+1)*20, 20, 20))
+      canvasy += field(i)
+    }
 
     canvasy.draw()
+
+    val grid = new Grid(20, 20, walls_top, walls_bottom, walls_right, walls_left, field)
   }
 
   /*def scalaJSDemo(c: html.Canvas): Unit = {
