@@ -71,10 +71,10 @@ object Main {
 
     // The main game loop
     val gameLoop = () => {
-      grid.spots(direction.x)(direction.y) = field(direction.x - 1)(direction.y - 1)
+      grid.spots(direction.x)(direction.y) = field(snake(0).point.x + direction.x - 1)(snake(0).point.y + direction.y - 1)
       direction = update()
       snake(0).move(snake(0).point + direction)
-      grid.spots(direction.x)(direction.y) = snake(0)
+      grid.spots(snake(0).point.x)(snake(0).point.y) = snake(0)
       canvasy.drawGrid(grid)
 
       if (numberApple < numberMaxApple) {
