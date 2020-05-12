@@ -18,6 +18,7 @@ case class Color(col: String) extends CanvasElementModifier[Spot] {
   }
 }
 
+
 case class StrokeWidth(n: Int) extends CanvasElementModifier[Spot] {
   override def change(x: Spot): Unit = {
     x match {
