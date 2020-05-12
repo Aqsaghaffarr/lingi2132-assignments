@@ -3,8 +3,18 @@ package webapp
 //import DSLDemo._
 import DSL.{Color, _}
 import DSL.Extends._
+import scala.scalajs.js
 import org.scalajs.dom.{document, html}
+import org.scalajs.dom.{Event, KeyboardEvent, window}
+import org.scalajs.dom.ext.{KeyCode, LocalStorage}
 import org.scalajs.dom
+import org.scalajs.dom
+import org.scalajs.dom.ext.KeyCode
+
+import scala.scalajs.js
+import org.scalajs.dom.html.Canvas
+import org.scalajs.dom.raw.HTMLImageElement
+import scala.collection.mutable
 //import DSLDemo.Extends._
 
 object Main {
@@ -20,18 +30,16 @@ object Main {
   }
 
   def useGameDSL(canvas: html.Canvas): Unit = {
+    val spotSize = 20
     val canvasy = new Canvasy(canvas)
+    val numberMaxApple = 2
+    var numberApple = 0
 
     // walls
-    val walls_top = Array.tabulate(20)(i => Wall(0, i*20, 20, 20))
-    val walls_right = Array.tabulate(18)(i => Wall((i+1)*20, 0, 20, 20))
-    val walls_bottom = Array.tabulate(20)(i => Wall(380, i*20, 20, 20))
-    val walls_left = Array.tabulate(18)(i => Wall((i+1)*20, 380, 20, 20))
-
-    walls_top change Color("black")
-    walls_bottom change Color("black")
-    walls_right change Color("black")
-    walls_left change Color("black")
+    val walls_top = Array.tabulate(20)(i => Wall(Point(0,i), spotSize))
+    val walls_right = Array.tabulate(18)(i => Wall(Point(i+1, 0), spotSize))
+    val walls_bottom = Array.tabulate(20)(i => Wall(Point(19, i), spotSize))
+    val walls_left = Array.tabulate(18)(i => Wall(Point(i+1, 19), spotSize))
 
     canvasy += walls_top
     canvasy += walls_bottom
@@ -41,13 +49,63 @@ object Main {
     // field
     val field : Array[Array[Empty]] = new Array[Array[Empty]](18)
     for (i <- 0 until 18) {
-      field(i) = Array.tabulate(18)(j => Empty((i+1)*20, (j+1)*20, 20, 20))
+      field(i) = Array.tabulate(18)(j => Empty(Point(i+1, j+1), spotSize))
+      field(i) change Color("white")
       canvasy += field(i)
     }
 
-    canvasy.draw()
-
     val grid = new Grid(20, 20, walls_top, walls_bottom, walls_right, walls_left, field)
+
+    var snake :Array[Snake] = new Array[Snake](1)
+    snake(0) = Snake(Point(5,5), spotSize)
+    var direction = Point(5,5)
+    grid.spots(5)(5) = snake(0)
+
+    snake change Color("green")
+    canvasy += snake
+    canvasy.drawGrid(grid)
+
+    import scala.collection.mutable.HashMap
+    val keysDown = HashMap[Int, Boolean]()
+
+    dom.window.addEventListener("keydown", (e: dom.KeyboardEvent) => {
+      keysDown += e.keyCode -> true
+    }, false)
+
+    dom.window.addEventListener("keyup", (e: dom.KeyboardEvent) => {
+      keysDown -= e.keyCode
+    }, false)
+
+    def update(): Point = {
+      if (keysDown.contains(KeyCode.Left))  direction - Point(1,0)
+      else if (keysDown.contains(KeyCode.Right)) direction - Point(-1,0)
+      else if (keysDown.contains(KeyCode.Up))    direction - Point(0,1)
+      else if (keysDown.contains(KeyCode.Down))  direction - Point(0,-1)
+      else direction
+    }
+
+    // The main game loop
+    val gameLoop = () => {
+      grid.spots(direction.x.toInt)(direction.y.toInt) = field(direction.x.toInt-1)(direction.y.toInt-1)
+      direction = update()
+      snake(0).move(direction)
+      grid.spots(direction.x.toInt)(direction.y.toInt) = snake(0)
+      canvasy.drawGrid(grid)
+
+      if(numberApple < numberMaxApple){
+        val random = new scala.util.Random
+        val xApple = random.nextInt(spotSize-2)
+        val yApple = random.nextInt(spotSize-2)
+        val pApple = Point(xApple+1, yApple+1)
+        val apple = Apple(pApple, spotSize)
+        apple change Color("red")
+        grid.spots(pApple.x.toInt)(pApple.y.toInt) = apple
+        canvasy.drawGrid(grid)
+        numberApple += 1
+      }
+    }
+    dom.window.setInterval(gameLoop, 50)
+
   }
 
   /*def scalaJSDemo(c: html.Canvas): Unit = {

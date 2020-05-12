@@ -2,6 +2,10 @@ package DSL
 
 import org.scalajs.dom
 import org.scalajs.dom.{CanvasRenderingContext2D, html}
+import scala.scalajs.js
+import js.Dynamic.{ global => g }
+import org.scalajs.dom
+import scala.collection.mutable
 
 import scala.collection.mutable.ArrayBuffer
 
@@ -21,25 +25,36 @@ class Canvasy(canvas: html.Canvas) {
     }
   }
 
-  def draw(): Unit = {
-    spots.foreach {
-      case w: Wall =>
-        ctx.strokeStyle = w.color
-        ctx.lineWidth = w.strokeWidth
-        ctx.fillRect(w.x, w.y, w.width, w.height)
-      case a: Apple =>
-        ctx.strokeStyle = a.color
-        ctx.lineWidth = a.strokeWidth
-        ctx.strokeRect(a.x, a.y, a.width, a.height)
-      case e: Empty =>
-        ctx.strokeStyle = e.color
-        ctx.lineWidth = e.strokeWidth
-        ctx.strokeRect(e.x, e.y, e.width, e.height)
-      case s: Snake =>
-        ctx.strokeStyle = s.color
-        ctx.lineWidth = s.strokeWidth
-        ctx.strokeRect(s.x, s.y, s.width, s.height)
-      case _ => throw new UnsupportedOperationException
+  def empty() : Unit = {
+    spots.clear()
+  }
+
+
+  def drawGrid(grid : Grid): Unit = {
+    for {
+      i <- 0 until grid.spots.length
+      j <- 0 until grid.spots(0).length
+    } {
+      grid.spots(i)(j) match {
+        case w: Wall =>
+          ctx.fillStyle = w.color
+          ctx.lineWidth = w.strokeWidth
+          ctx.fillRect(w.point.x * w.size, w.point.y * w.size, w.size, w.size)
+        case a: Apple =>
+          ctx.fillStyle = a.color
+          ctx.lineWidth = a.strokeWidth
+          ctx.fillRect(a.point.x * a.size, a.point.y * a.size, a.size, a.size)
+        case e: Empty =>
+          ctx.fillStyle = e.color
+          ctx.lineWidth = e.strokeWidth
+          ctx.fillRect(e.point.x * e.size, e.point.y * e.size, e.size, e.size)
+        case s: Snake =>
+          ctx.fillStyle = s.color
+          ctx.lineWidth = s.strokeWidth
+          ctx.fillRect(s.point.x * s.size, s.point.y * s.size, s.size, s.size)
+      }
     }
   }
+
+
 }
