@@ -24,27 +24,30 @@ object Main {
 
   def useGameDSL(canvas: html.Canvas): Unit = {
     val spotSize = 20
+    val height = 20
+    val width = 20
     val canvasy = new Canvasy(canvas)
     val numberMaxApple = 2
     var numberApple = 0
+    var score = 0
 
     // walls
-    val walls_top = Array.tabulate(20)(i => Wall(Point(0, i), spotSize))
-    val walls_right = Array.tabulate(18)(i => Wall(Point(i + 1, 0), spotSize))
-    val walls_bottom = Array.tabulate(20)(i => Wall(Point(19, i), spotSize))
-    val walls_left = Array.tabulate(18)(i => Wall(Point(i + 1, 19), spotSize))
+    val walls_top = Array.tabulate(width)(i => Wall(Point(0, i), spotSize))
+    val walls_right = Array.tabulate(height - 2)(i => Wall(Point(i + 1, 0), spotSize))
+    val walls_bottom = Array.tabulate(width)(i => Wall(Point(height - 1, i), spotSize))
+    val walls_left = Array.tabulate(height - 2)(i => Wall(Point(i + 1, width - 1), spotSize))
 
     // field
-    val field : Array[Array[Empty]] = new Array[Array[Empty]](18)
-    for (i <- 0 until 18) {
-      field(i) = Array.tabulate(18)(j => Empty(Point(i + 1, j + 1), spotSize))
+    val field : Array[Array[Empty]] = new Array[Array[Empty]](height - 2)
+    for (i <- 0 until height - 2) {
+      field(i) = Array.tabulate(height - 2)(j => Empty(Point(i + 1, j + 1), spotSize))
       field(i) change Color("white")
     }
 
-    val grid = Grid(20, 20, walls_top, walls_bottom, walls_right, walls_left, field)
+    val grid = Grid(width, height, walls_top, walls_bottom, walls_right, walls_left, field)
 
     var snake: Array[Snake] = new Array[Snake](1)
-    snake(0) = Snake(Point(5, 5), spotSize)
+    snake(0) = Snake(Point(height / 2, width / 2), spotSize)
     var direction = Point(1, 0)
     grid.spots(5)(5) = snake(0)
 
@@ -62,19 +65,23 @@ object Main {
     }, useCapture = false)
 
     def update(): Point = {
-      if      (keysDown.contains(KeyCode.Left))  Point(-1, 0)
-      else if (keysDown.contains(KeyCode.Right)) Point(1, 0)
-      else if (keysDown.contains(KeyCode.Up))    Point(0, -1)
-      else if (keysDown.contains(KeyCode.Down))  Point(0, 1)
-      else                                       direction
+      if      (keysDown.contains(KeyCode.Left) && direction != Point(1, 0))   Point(-1, 0)
+      else if (keysDown.contains(KeyCode.Right) && direction != Point(-1, 0)) Point(1, 0)
+      else if (keysDown.contains(KeyCode.Up) && direction != Point(0, 1))     Point(0, -1)
+      else if (keysDown.contains(KeyCode.Down) && direction != Point(0, -1))  Point(0, 1)
+      else                                                                    direction
     }
 
     // The main game loop
     val gameLoop = () => {
-      grid.spots(direction.x)(direction.y) = field(snake(0).point.x + direction.x - 1)(snake(0).point.y + direction.y - 1)
+      grid.spots(snake(0).point.x.toInt)(snake(0).point.y.toInt) = field(snake(0).point.x.toInt - 1)(snake(0).point.y.toInt - 1)
       direction = update()
       snake(0).move(snake(0).point + direction)
-      grid.spots(snake(0).point.x)(snake(0).point.y) = snake(0)
+      if (grid.spots(snake(0).point.x.toInt)(snake(0).point.y.toInt).isInstanceOf[Apple]) {
+        numberApple -= 1
+        score += 1
+      }
+      grid.spots(snake(0).point.x.toInt)(snake(0).point.y.toInt) = snake(0)
       canvasy.drawGrid(grid)
 
       if (numberApple < numberMaxApple) {
@@ -84,13 +91,13 @@ object Main {
         val pApple = Point(xApple + 1, yApple + 1)
         val apple = Apple(pApple, spotSize)
         apple change Color("red")
-        grid.spots(pApple.x)(pApple.y) = apple
+        grid.spots(pApple.x.toInt)(pApple.y.toInt) = apple
         canvasy.drawGrid(grid)
         numberApple += 1
       }
     }
 
-    dom.window.setInterval(gameLoop, 50)
+    dom.window.setInterval(gameLoop, 100)
   }
 
   /*def scalaJSDemo(c: html.Canvas): Unit = {
