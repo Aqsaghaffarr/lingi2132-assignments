@@ -117,20 +117,17 @@ class DSLTest extends AnyFunSuite with Matchers {
     counter shouldBe sl.length + al.length
   }
 
-
-/*
-  test("map") {
-    val rl = newRectangleList(10)
-    val expected = List.tabulate(rl.length)(i => Circle(rl(i).x, rl(i).y, 20))
-    val g = ComposedShape(rl)
-    val newG = g.map(r => Circle(r.asInstanceOf[Rectangle].x, r.asInstanceOf[Rectangle].y, 20))
-    for (i <- rl.indices) {
-      g(i) shouldBe rl(i)
+  test("Map on ComposedSpot") {
+    val el = newEmptyList()
+    val expected = List.tabulate(el.length)(i => Wall(Point(el(i).position.x, el(i).position.y), 20))
+    val g = ComposedSpot(el)
+    val newG = g.map(e => Wall(Point(e.asInstanceOf[Empty].position.x, e.asInstanceOf[Empty].position.y), 20))
+    for (i <- el.indices) {
+      g(i) shouldBe el(i)
       newG(i) shouldBe expected(i)
       assert(g(i) != newG(i))
     }
   }
-*/
 
   test("Prepend in ComposedSpot") {
     val l = newWallList()
@@ -156,8 +153,8 @@ class DSLTest extends AnyFunSuite with Matchers {
     val oldl = newWallList()
     val l = oldl :+ newWall(Point(-1, -2), 10)
     val g = ComposedSpot(l)
-    g.containsPosition(Point(-1, -2)) shouldBe true
-    g.containsPosition(Point(-2, -1)) shouldBe false
+    g.contains(Point(-1, -2)) shouldBe true
+    g.contains(Point(-2, -1)) shouldBe false
     g.remove(Point(-1, -2))
     for (i <- oldl.indices) {
       g(i) shouldBe oldl(i)

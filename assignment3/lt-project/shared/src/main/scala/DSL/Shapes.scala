@@ -56,13 +56,20 @@ case class Snake(override val position: Point, size: Int) extends Spot with Spot
 
 case class Score(override val position: Point, size: Int, var score: Int, text: String) extends Spot with SpotAttributes {
   type A = Score
+
   var font = "20px Helvetica"
+
   override def change(property: CanvasElementModifier[A]): Unit = property.change(this)
 }
 
 
 case class ComposedSpot[T <: Spot](var l: Seq[T]) extends Spot {
   type A = T
+
+  def map(f: Spot => Spot): ComposedSpot[Spot] = ComposedSpot(l.map(f))
+
+  def flatMap(f: Spot => Iterable[Spot]): ComposedSpot[Spot] = ComposedSpot(l.flatMap(f))
+
 
   def foreach[B](f: Spot => B): Unit = {
     if (l.nonEmpty) {
@@ -85,8 +92,8 @@ case class ComposedSpot[T <: Spot](var l: Seq[T]) extends Spot {
     l = sb +: l
   }
 
-  def containsPosition(p: Point): Boolean = {
-    l.exists(_.position == p)
+  def contains(p: Point): Boolean = {
+    l.map(_.position).contains(p)
   }
 
   def head: Spot = {

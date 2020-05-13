@@ -12,14 +12,18 @@ import scala.collection.mutable
 
 object Main {
 
-  def main(args: Array[String]): Unit = {
-    // Define canvas.
+  def createCanvas(width: Int, height: Int): html.Canvas = {
     val canvas = document.createElement("canvas").asInstanceOf[html.Canvas]
     document.body.appendChild(canvas)
 
-    val w = 500
-    canvas.width = w
-    canvas.height = w
+    canvas.width = width
+    canvas.height = height
+    canvas
+  }
+
+  def main(args: Array[String]): Unit = {
+    // Define canvas.
+    val canvas = createCanvas(500, 500)
     useGameDSL(canvas)
   }
 
@@ -30,7 +34,7 @@ object Main {
     val canvasy = new Canvasy(canvas)
     val maxApples = 2 // Maximum concurrent number of apples on the field.
     val apples: ComposedSpot[Apple] = ComposedSpot[Apple](Seq[Apple]()) // List of apples on the field.
-    val score = Score(Point(height/1.5, width), 10, 0, "Your score is") // Score of the player (number of apples eaten).
+    val score = Score(Point(height/2 * spotSize, width/2 * spotSize - 15), spotSize, 0, "Your score is") // Score of the player (number of apples eaten).
     val random = new scala.util.Random // RNG.
     var lives = 1 // Number of lives.
     val snakeColor: String = "green"
@@ -66,7 +70,7 @@ object Main {
     def generateApples(): Unit = {
       while (apples.size < maxApples) {
         var applePosition = Point(random.nextInt(height - 2) + 1, random.nextInt(width - 2) + 1)
-        while (snake.containsPosition(applePosition) || apples.containsPosition(applePosition)) {
+        while (snake.contains(applePosition) || apples.contains(applePosition)) {
           applePosition = Point(random.nextInt(height - 2) + 1, random.nextInt(width - 2) + 1)
         }
         val apple = Apple(applePosition, spotSize)
@@ -101,15 +105,16 @@ object Main {
         Point(0, -1)
       } else if (keysDown.contains(KeyCode.Down) && direction != Point(0, -1)) {
         Point(0, 1)
-      } else if (alive) direction
-      else {
-        Point(0,0)
+      } else if (alive) {
+        direction
+      } else {
+        Point(0, 0)
       }
     }
 
     // Main game loop.
     val gameLoop = () => {
-      if(alive) {
+      if (alive) {
         direction = update()
         val newHeadPos: Point = snake.head.position + direction
         val newSpot: Spot = grid.spots(newHeadPos.x.toInt)(newHeadPos.y.toInt)
@@ -145,8 +150,11 @@ object Main {
           generateApples()
           canvasy.drawGrid(grid)}
         }
-      else if(keysDown.contains(KeyCode.Space) && !alive){
-          useGameDSL(canvas)
+      else if (keysDown.contains(KeyCode.Space)) {
+        val w = canvas.width
+        val h = canvas.height
+        document.body.removeChild(canvas)
+        useGameDSL(createCanvas(w, h))
       }
     }
 
