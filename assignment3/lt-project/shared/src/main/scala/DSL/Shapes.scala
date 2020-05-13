@@ -31,11 +31,44 @@ case class Empty(point: Point, size: Int) extends Spot with SpotAttributes {
 }
 
 
-case class Snake(point: Point, size: Int) extends Spot with SpotAttributes {
+case class SnakeBlock(point: Point, size: Int) extends Spot with SpotAttributes {
   override def change(property: CanvasElementModifier[Spot]): Unit = property.change(this)
   def move(p: Point): Unit = {
     point.x = p.x
     point.y = p.y
+  }
+}
+
+
+case class Snake(l: List[SnakeBlock]) extends Spot {
+  def foreach[B](f: SnakeBlock => B): Unit = {
+    if (l.nonEmpty) {
+      f(l.head)
+      l.tail.foreach(f)
+    }
+  }
+
+  def apply(i: Int): SnakeBlock = {
+    if (i < 0) {
+      throw new IndexOutOfBoundsException
+    } else if (i == 0) {
+      l.head
+    } else {
+      l.tail(i - 1)
+    }
+  }
+
+
+  override def change(property: CanvasElementModifier[Spot]): Unit = {
+    l.foreach(x => x.change(property.asInstanceOf[CanvasElementModifier[Spot]]))
+  }
+
+  def move(p: Point): Unit = {
+    if (l.nonEmpty) {
+      val headPosition: Point = l.head.point
+      l.head.move(p)
+      Snake(l.tail).move(headPosition)
+    }
   }
 }
 

@@ -13,6 +13,7 @@ import scala.collection.mutable
 object Main {
 
   def main(args: Array[String]): Unit = {
+    // Define canvas.
     val canvas = document.createElement("canvas").asInstanceOf[html.Canvas]
     document.body.appendChild(canvas)
 
@@ -23,37 +24,43 @@ object Main {
   }
 
   def useGameDSL(canvas: html.Canvas): Unit = {
-    val spotSize = 20
-    val height = 20
-    val width = 20
+    val spotSize = 20 // Size of the squares on the grid.
+    val height = 20 // Number of rows on the grid (with walls).
+    val width = 20 // Number of columns on the grid (with walls).
     val canvasy = new Canvasy(canvas)
-    val numberMaxApple = 2
-    var numberApple = 0
-    var score = 0
+    val numberMaxApple = 2 // Maximum concurrent number of apples on the field.
+    var numberApple = 0 // Current number of apples on the field.
+    var score = 0 // Score of the player (number of apples eaten).
+    val random = new scala.util.Random // RNG.
+    var lives = 1 // Number of lives.
 
-    // walls
-    val walls_top = Array.tabulate(width)(i => Wall(Point(0, i), spotSize))
-    val walls_right = Array.tabulate(height - 2)(i => Wall(Point(i + 1, 0), spotSize))
-    val walls_bottom = Array.tabulate(width)(i => Wall(Point(height - 1, i), spotSize))
-    val walls_left = Array.tabulate(height - 2)(i => Wall(Point(i + 1, width - 1), spotSize))
+    // Walls.
+    val wallTop: Array[Wall] = Array.tabulate(width)(i => Wall(Point(0, i), spotSize))
+    val wallRight: Array[Wall] = Array.tabulate(height - 2)(i => Wall(Point(i + 1, 0), spotSize))
+    val wallBottom: Array[Wall] = Array.tabulate(width)(i => Wall(Point(height - 1, i), spotSize))
+    val wallLeft: Array[Wall] = Array.tabulate(height - 2)(i => Wall(Point(i + 1, width - 1), spotSize))
 
-    // field
+    // Field.
     val field : Array[Array[Empty]] = new Array[Array[Empty]](height - 2)
-    for (i <- 0 until height - 2) {
+    // Define the white squares that make up the playing field.
+    for (i <- field.indices) {
       field(i) = Array.tabulate(height - 2)(j => Empty(Point(i + 1, j + 1), spotSize))
       field(i) change Color("white")
     }
 
-    val grid = Grid(width, height, walls_top, walls_bottom, walls_right, walls_left, field)
+    // Define the grid, containing both the walls and the field.
+    val grid = Grid(width, height, wallTop, wallBottom, wallRight, wallLeft, field)
 
-    var snake: Array[Snake] = new Array[Snake](1)
-    snake(0) = Snake(Point(height / 2, width / 2), spotSize)
-    var direction = Point(1, 0)
-    grid.spots(5)(5) = snake(0)
+    // The snake (starts off at size 1, in the middle of the playing field).
+    val middle: Point = Point((height - height%2) / 2, (width - width%2) / 2)
+    val snake: Snake = Snake(List(SnakeBlock(middle, spotSize)))
+    var direction = Point(1, 0) // Direction of the snake (initially, to the right).
+    grid.spots((height - height%2) / 2)((width - width%2) / 2) = snake(0)
 
     snake change Color("green")
     canvasy.drawGrid(grid)
 
+    // Detect key presses.
     val keysDown = mutable.HashMap[Int, Boolean]()
 
     dom.window.addEventListener("keydown", (e: dom.KeyboardEvent) => {
@@ -64,6 +71,7 @@ object Main {
       keysDown -= e.keyCode
     }, useCapture = false)
 
+    // Update snake direction.
     def update(): Point = {
       if      (keysDown.contains(KeyCode.Left) && direction != Point(1, 0))   Point(-1, 0)
       else if (keysDown.contains(KeyCode.Right) && direction != Point(-1, 0)) Point(1, 0)
@@ -72,26 +80,28 @@ object Main {
       else                                                                    direction
     }
 
-    // The main game loop
+    // Main game loop.
     val gameLoop = () => {
       grid.spots(snake(0).point.x.toInt)(snake(0).point.y.toInt) = field(snake(0).point.x.toInt - 1)(snake(0).point.y.toInt - 1)
       direction = update()
       snake(0).move(snake(0).point + direction)
-      if (grid.spots(snake(0).point.x.toInt)(snake(0).point.y.toInt).isInstanceOf[Apple]) {
-        numberApple -= 1
-        score += 1
+      val newPositionOnGrid: Spot = grid.spots(snake(0).point.x.toInt)(snake(0).point.y.toInt)
+      newPositionOnGrid match {
+        case _: Apple =>
+          numberApple -= 1
+          score += 1
+        case _: Wall | _: SnakeBlock =>
+          lives -= 1
+        case _ => throw new UnsupportedOperationException
       }
       grid.spots(snake(0).point.x.toInt)(snake(0).point.y.toInt) = snake(0)
       canvasy.drawGrid(grid)
 
       if (numberApple < numberMaxApple) {
-        val random = new scala.util.Random
-        val xApple = random.nextInt(spotSize - 2)
-        val yApple = random.nextInt(spotSize - 2)
-        val pApple = Point(xApple + 1, yApple + 1)
-        val apple = Apple(pApple, spotSize)
+        val applePosition = Point(random.nextInt(spotSize - 2) + 1, random.nextInt(spotSize - 2) + 1)
+        val apple = Apple(applePosition, spotSize)
         apple change Color("red")
-        grid.spots(pApple.x.toInt)(pApple.y.toInt) = apple
+        grid.spots(applePosition.x.toInt)(applePosition.y.toInt) = apple
         canvasy.drawGrid(grid)
         numberApple += 1
       }

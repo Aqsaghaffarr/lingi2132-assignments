@@ -1,15 +1,15 @@
 package DSL
 
+
 import org.scalajs.dom
 import org.scalajs.dom.{CanvasRenderingContext2D, html}
 
-import scala.collection.mutable.ArrayBuffer
 
 class Canvasy(canvas: html.Canvas) {
 
   val ctx: CanvasRenderingContext2D = canvas.getContext("2d").asInstanceOf[dom.CanvasRenderingContext2D]
 
-  def drawGrid(grid : Grid): Unit = {
+  def drawGrid(grid: Grid): Unit = {
     for (i <- grid.spots.indices; j <- grid.spots(0).indices) {
       grid.spots(i)(j) match {
         case w: Wall =>
@@ -24,7 +24,7 @@ class Canvasy(canvas: html.Canvas) {
           ctx.fillStyle = e.color
           ctx.lineWidth = e.strokeWidth
           ctx.fillRect(e.point.x * e.size, e.point.y * e.size, e.size, e.size)
-        case s: Snake =>
+        case s: SnakeBlock =>
           ctx.fillStyle = s.color
           ctx.lineWidth = s.strokeWidth
           ctx.fillRect(s.point.x * s.size, s.point.y * s.size, s.size, s.size)
