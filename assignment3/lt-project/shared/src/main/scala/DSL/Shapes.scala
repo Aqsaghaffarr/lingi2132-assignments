@@ -54,6 +54,13 @@ case class Snake(override val position: Point, size: Int) extends Spot with Spot
 }
 
 
+case class Score(override val position: Point, size: Int, var score: Int, text: String) extends Spot with SpotAttributes {
+  type A = Score
+  var font = "20px Helvetica"
+  override def change(property: CanvasElementModifier[A]): Unit = property.change(this)
+}
+
+
 case class ComposedSpot[T <: Spot](var l: Seq[T]) extends Spot {
   type A = T
 

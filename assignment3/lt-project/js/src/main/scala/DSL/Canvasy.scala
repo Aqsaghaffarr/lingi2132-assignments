@@ -32,4 +32,10 @@ class Canvasy(canvas: html.Canvas) {
       }
     }
   }
+
+  def showScore(score: Score): Unit = {
+    val text = score.text + ": " + score.score.toString
+    ctx.font = score.font
+    ctx.fillText(text, score.position.x * score.size, score.position.y * score.size)
+  }
 }
