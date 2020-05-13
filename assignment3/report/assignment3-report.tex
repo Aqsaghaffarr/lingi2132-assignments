@@ -1,0 +1,81 @@
+\documentclass[journal]{IEEEtran}
+%\usepackage[left=1.25cm,right=1.25cm,top=1.25cm,bottom=1.25cm]{geometry}
+\usepackage[utf8]{inputenc}
+\usepackage[english]{babel}
+\usepackage{minted}
+\usepackage{booktabs}
+\usepackage{amsmath}
+\usepackage{float}
+\usepackage{mathtools}
+\usepackage{color}
+\usepackage{amsthm}
+\usepackage{parskip}
+\usepackage{graphicx}
+\usepackage{epstopdf}
+\usepackage{amssymb}
+\usepackage{mathrsfs}
+
+\usepackage[backend=biber, style=trad-abbrv]{biblatex}
+\makeatletter
+\def\blx@maxline{77}
+\makeatother
+
+\addbibresource{bibliography.bib}
+
+%\linespread{0.9}
+
+\newcommand{\subparagraph}{}
+\usepackage[compact]{titlesec}
+
+\titlespacing{\section}{0pt}{\parskip}{-\parskip}
+\titlespacing{\subsection}{0pt}{\parskip}{-\parskip}
+\titlespacing{\subsubsection}{0pt}{\parskip}{-\parskip}
+
+\usepackage{pgfplots}
+\pgfplotsset{compat=newest}
+\usepgfplotslibrary{groupplots}
+\usepgfplotslibrary{dateplot}
+\usepackage{tikzscale}
+
+\theoremstyle{definition}
+\newtheorem{defn}{Definition}[section]
+
+\usepackage[binary-units=true]{siunitx}
+
+\newcommand{\py}[1]{\mintinline{python}{#1}}
+\newcommand{\java}[1]{\mintinline{java}{#1}}
+\newcommand{\sql}[1]{\mintinline{sql}{#1}}
+
+\renewcommand{\epsilon}{\varepsilon}
+\renewcommand{\theta}{\vartheta}
+\renewcommand{\kappa}{\varkappa}
+\renewcommand{\rho}{\varrho}
+\renewcommand{\phi}{\varphi}
+
+\newcommand{\db}{\mathcal{D}}
+\newcommand{\is}{\mathcal{I}}
+\newcommand{\tr}{\mathcal{T}}
+
+\newcommand{\abs}[1]{|#1|}
+
+\usepackage{hyperref}
+
+\title{Languages \& translators: Domain-specific languages}
+\author{Gilles Peiffer (24321600), Liliya Semerikova (64811600)}
+\date{May 15, 2020}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+	This paper gives some more insight into the domain-specific language we designed for the third project of LINGI2132.
+	Several key design choices are explained, and more information is given about the strengths of our implementation.
+	We also briefly cover possible further improvements are given.
+\end{abstract}
+
+\section{Introduction}
+
+\printbibliography
+
+\end{document}
