@@ -30,12 +30,13 @@ object Main {
     val canvasy = new Canvasy(canvas)
     val maxApples = 2 // Maximum concurrent number of apples on the field.
     val apples: ComposedSpot[Apple] = ComposedSpot[Apple](Seq[Apple]()) // List of apples on the field.
-    var score = 0 // Score of the player (number of apples eaten).
+    val score = Score(Point(height/1.5, width), 10, 0, "Your score is") // Score of the player (number of apples eaten).
     val random = new scala.util.Random // RNG.
     var lives = 1 // Number of lives.
     val snakeColor: String = "green"
     val appleColor: String = "red"
     val emptyColor: String = "white"
+    var alive: Boolean = true
 
     // Walls.
     val wallTop: Array[Wall] = Array.tabulate(width)(i => Wall(Point(0, i), spotSize))
@@ -100,46 +101,53 @@ object Main {
         Point(0, -1)
       } else if (keysDown.contains(KeyCode.Down) && direction != Point(0, -1)) {
         Point(0, 1)
-      } else {
-        direction
+      } else if (alive) direction
+      else {
+        Point(0,0)
       }
     }
 
     // Main game loop.
     val gameLoop = () => {
-      direction = update()
-      val newHeadPos: Point = snake.head.position + direction
-      val newSpot: Spot = grid.spots(newHeadPos.x.toInt)(newHeadPos.y.toInt)
-      var elongate: Boolean = false
-      newSpot match {
-        case _: Apple =>
-          apples.remove(newHeadPos)
-          score += 1
-          elongate = true
-        case _: Wall | _: Snake =>
-          lives -= 1
-          if (lives == 0) {
-            // do something
+      if(alive) {
+        direction = update()
+        val newHeadPos: Point = snake.head.position + direction
+        val newSpot: Spot = grid.spots(newHeadPos.x.toInt)(newHeadPos.y.toInt)
+        var elongate: Boolean = false
+        newSpot match {
+          case _: Apple =>
+            apples.remove(newHeadPos)
+            score.score += 1
+            elongate = true
+          case _: Wall | _: Snake =>
+            lives -= 1
+            if (lives == 0) {
+              canvasy.showScore(score)
+            }
+            alive = false
+          case _: Empty =>
+          case _ => throw new UnsupportedOperationException
+        }
+
+        if (alive) {
+          if (elongate) {
+            val newSnakeBlock: Snake = Snake(newHeadPos, spotSize)
+            newSnakeBlock change Color(snakeColor)
+            snake prepend newSnakeBlock
+          } else {
+            val lastPosition: Point = snake.last.position
+            grid.spots(lastPosition.x.toInt)(lastPosition.y.toInt) = field(lastPosition.x.toInt - 1)(lastPosition.y.toInt - 1)
+            snake.move(newHeadPos)
           }
-        case _: Empty =>
-        case _ => throw new UnsupportedOperationException
+
+          snake.foreach(sb => grid.spots(sb.position.x.toInt)(sb.position.y.toInt) = sb)
+
+          generateApples()
+          canvasy.drawGrid(grid)}
+        }
+      else if(keysDown.contains(KeyCode.Space) && !alive){
+          useGameDSL(canvas)
       }
-
-      if (elongate) {
-        val newSnakeBlock: Snake = Snake(newHeadPos, spotSize)
-        newSnakeBlock change Color(snakeColor)
-        snake prepend newSnakeBlock
-      } else {
-        val lastPosition: Point = snake.last.position
-        grid.spots(lastPosition.x.toInt)(lastPosition.y.toInt) = field(lastPosition.x.toInt - 1)(lastPosition.y.toInt - 1)
-        snake.move(newHeadPos)
-      }
-
-      snake.foreach(sb => grid.spots(sb.position.x.toInt)(sb.position.y.toInt) = sb)
-
-      generateApples()
-
-      canvasy.drawGrid(grid)
     }
 
     dom.window.setInterval(gameLoop, 100)

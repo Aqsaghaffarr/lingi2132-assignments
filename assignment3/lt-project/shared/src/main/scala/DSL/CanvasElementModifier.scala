@@ -30,3 +30,7 @@ case class StrokeWidth(n: Int) extends CanvasElementModifier[Spot] {
     }
   }
 }
+
+case class Font(font: String) extends CanvasElementModifier[Score] {
+  override def change(x: Score): Unit = x.font = font
+}
