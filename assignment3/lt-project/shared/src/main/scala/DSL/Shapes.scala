@@ -40,7 +40,7 @@ case class SnakeBlock(point: Point, size: Int) extends Spot with SpotAttributes 
 }
 
 
-case class Snake(l: List[SnakeBlock]) extends Spot {
+case class Snake(var l: Seq[SnakeBlock]) extends Spot {
   def foreach[B](f: SnakeBlock => B): Unit = {
     if (l.nonEmpty) {
       f(l.head)
@@ -58,16 +58,29 @@ case class Snake(l: List[SnakeBlock]) extends Spot {
     }
   }
 
+  def +=(sb: SnakeBlock): Unit = {
+    l = l :+ sb
+  }
+
+  def containsPosition(pos: Point): Boolean = {
+    List(l.foreach(_.point)).contains(pos)
+  }
+
+  def last(): SnakeBlock = {
+    l.last
+  }
 
   override def change(property: CanvasElementModifier[Spot]): Unit = {
     l.foreach(x => x.change(property.asInstanceOf[CanvasElementModifier[Spot]]))
   }
 
   def move(p: Point): Unit = {
-    if (l.nonEmpty) {
-      val headPosition: Point = l.head.point
-      l.head.move(p)
-      Snake(l.tail).move(headPosition)
+    var old = l.head.point
+    l.head.move(p)
+    for (sb <- l.tail) {
+      val nOld: Point = sb.point
+      sb.move(old)
+      old = nOld
     }
   }
 }
@@ -109,4 +122,5 @@ case class Point(var x: Double, var y: Double){
   def -(other: Point): Point = Point(x - other.x, y - other.y)
   def <(other: Point): Boolean = x < other.x && y < other.y
   def >(other: Point): Boolean = x > other.x && y > other.y
+  def ==(other: Point): Boolean = x == other.x && y == other.y
 }

@@ -33,6 +33,9 @@ object Main {
     var score = 0 // Score of the player (number of apples eaten).
     val random = new scala.util.Random // RNG.
     var lives = 1 // Number of lives.
+    val snakeColor: String = "green"
+    val appleColor: String = "red"
+    val emptyColor: String = "white"
 
     // Walls.
     val wallTop: Array[Wall] = Array.tabulate(width)(i => Wall(Point(0, i), spotSize))
@@ -45,7 +48,7 @@ object Main {
     // Define the white squares that make up the playing field.
     for (i <- field.indices) {
       field(i) = Array.tabulate(height - 2)(j => Empty(Point(i + 1, j + 1), spotSize))
-      field(i) change Color("white")
+      field(i) change Color(emptyColor)
     }
 
     // Define the grid, containing both the walls and the field.
@@ -57,7 +60,7 @@ object Main {
     var direction = Point(1, 0) // Direction of the snake (initially, to the right).
     grid.spots((height - height%2) / 2)((width - width%2) / 2) = snake(0)
 
-    snake change Color("green")
+    snake change Color(snakeColor)
     canvasy.drawGrid(grid)
 
     // Detect key presses.
@@ -73,34 +76,63 @@ object Main {
 
     // Update snake direction.
     def update(): Point = {
-      if      (keysDown.contains(KeyCode.Left) && direction != Point(1, 0))   Point(-1, 0)
-      else if (keysDown.contains(KeyCode.Right) && direction != Point(-1, 0)) Point(1, 0)
-      else if (keysDown.contains(KeyCode.Up) && direction != Point(0, 1))     Point(0, -1)
-      else if (keysDown.contains(KeyCode.Down) && direction != Point(0, -1))  Point(0, 1)
-      else                                                                    direction
+      if (keysDown.contains(KeyCode.Left) && direction != Point(1, 0)) {
+        Point(-1, 0)
+      } else if (keysDown.contains(KeyCode.Right) && direction != Point(-1, 0)) {
+        Point(1, 0)
+      } else if (keysDown.contains(KeyCode.Up) && direction != Point(0, 1)) {
+        Point(0, -1)
+      } else if (keysDown.contains(KeyCode.Down) && direction != Point(0, -1)) {
+        Point(0, 1)
+      } else {
+        direction
+      }
     }
 
     // Main game loop.
     val gameLoop = () => {
-      grid.spots(snake(0).point.x.toInt)(snake(0).point.y.toInt) = field(snake(0).point.x.toInt - 1)(snake(0).point.y.toInt - 1)
       direction = update()
-      snake(0).move(snake(0).point + direction)
-      val newPositionOnGrid: Spot = grid.spots(snake(0).point.x.toInt)(snake(0).point.y.toInt)
-      newPositionOnGrid match {
+      val newHeadPos: Point = snake(0).point + direction
+      val newSpot: Spot = grid.spots(newHeadPos.x.toInt)(newHeadPos.y.toInt)
+      var elongate: Boolean = false
+      newSpot match {
         case _: Apple =>
           numberApple -= 1
           score += 1
-        case _: Wall | _: SnakeBlock =>
+          elongate = true
+        case _: Wall =>
           lives -= 1
+        case _: SnakeBlock =>
+          lives -= 1
+          snake change Color("blue")
+        case _: Empty =>
         case _ => throw new UnsupportedOperationException
       }
-      grid.spots(snake(0).point.x.toInt)(snake(0).point.y.toInt) = snake(0)
+
+      if (elongate) {
+        val newSnakeBlock: SnakeBlock = SnakeBlock(snake.last().point, spotSize)
+        newSnakeBlock change Color(snakeColor)
+        snake += newSnakeBlock
+      } else {
+        val lastPosition: Point = snake.last().point
+        grid.spots(lastPosition.x.toInt)(lastPosition.y.toInt) = field(lastPosition.x.toInt - 1)(lastPosition.y.toInt - 1)
+      }
+
+      snake.move(newHeadPos)
+
+      for (sb <- snake) {
+        grid.spots(sb.point.x.toInt)(sb.point.y.toInt) = sb
+      }
+
       canvasy.drawGrid(grid)
 
       if (numberApple < numberMaxApple) {
-        val applePosition = Point(random.nextInt(spotSize - 2) + 1, random.nextInt(spotSize - 2) + 1)
+        var applePosition = Point(random.nextInt(spotSize - 2) + 1, random.nextInt(spotSize - 2) + 1)
+        while (snake.containsPosition(applePosition)) {
+          applePosition = Point(random.nextInt(spotSize - 2) + 1, random.nextInt(spotSize - 2) + 1)
+        }
         val apple = Apple(applePosition, spotSize)
-        apple change Color("red")
+        apple change Color(appleColor)
         grid.spots(applePosition.x.toInt)(applePosition.y.toInt) = apple
         canvasy.drawGrid(grid)
         numberApple += 1

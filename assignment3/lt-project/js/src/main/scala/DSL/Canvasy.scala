@@ -32,6 +32,4 @@ class Canvasy(canvas: html.Canvas) {
       }
     }
   }
-
-
 }
