@@ -2,11 +2,20 @@ package DSL
 
 
 sealed trait Spot {
-  def change(property: CanvasElementModifier[Spot]): Unit
+  type A <: Spot
+
+  val position: Point = Point(0, 0)
+
+  def change(property: CanvasElementModifier[A]): Unit
+
+  def move(p: Point): Unit = {
+    position.x = p.x
+    position.y = p.y
+  }
 }
 
 
-sealed trait SpotAttributes {
+trait SpotAttributes {
   var color = "black"
   var strokeWidth = 1
 
@@ -16,39 +25,46 @@ sealed trait SpotAttributes {
 }
 
 
-case class Wall(point: Point, size: Int) extends Spot with SpotAttributes {
-  override def change(property: CanvasElementModifier[Spot]): Unit = property.change(this)
+case class Wall(override val position: Point, size: Int) extends Spot with SpotAttributes {
+  type A = Wall
+
+  override def change(property: CanvasElementModifier[A]): Unit = property.change(this)
 }
 
 
-case class Apple(point: Point, size: Int) extends Spot with SpotAttributes {
-  override def change(property: CanvasElementModifier[Spot]): Unit = property.change(this)
+case class Apple(override val position: Point, size: Int) extends Spot with SpotAttributes {
+  type A = Apple
+
+  override def change(property: CanvasElementModifier[A]): Unit = property.change(this)
 }
 
 
-case class Empty(point: Point, size: Int) extends Spot with SpotAttributes {
-  override def change(property: CanvasElementModifier[Spot]): Unit = property.change(this)
+case class Empty(override val position: Point, size: Int) extends Spot with SpotAttributes {
+  type A = Empty
+
+
+  override def change(property: CanvasElementModifier[A]): Unit = property.change(this)
 }
 
 
-case class SnakeBlock(point: Point, size: Int) extends Spot with SpotAttributes {
-  override def change(property: CanvasElementModifier[Spot]): Unit = property.change(this)
-  def move(p: Point): Unit = {
-    point.x = p.x
-    point.y = p.y
-  }
+case class Snake(override val position: Point, size: Int) extends Spot with SpotAttributes {
+  type A = Snake
+
+  override def change(property: CanvasElementModifier[A]): Unit = property.change(this)
 }
 
 
-case class Snake(var l: Seq[SnakeBlock]) extends Spot {
-  def foreach[B](f: SnakeBlock => B): Unit = {
+case class ComposedSpot[T <: Spot](var l: Seq[T]) extends Spot {
+  type A = T
+
+  def foreach[B](f: Spot => B): Unit = {
     if (l.nonEmpty) {
       f(l.head)
       l.tail.foreach(f)
     }
   }
 
-  def apply(i: Int): SnakeBlock = {
+  def apply(i: Int): Spot = {
     if (i < 0) {
       throw new IndexOutOfBoundsException
     } else if (i == 0) {
@@ -58,29 +74,39 @@ case class Snake(var l: Seq[SnakeBlock]) extends Spot {
     }
   }
 
-  def +=(sb: SnakeBlock): Unit = {
-    l = l :+ sb
+  def prepend(sb: A): Unit = {
+    l = sb +: l
   }
 
-  def containsPosition(pos: Point): Boolean = {
-    List(l.foreach(_.point)).contains(pos)
+  def containsPosition(p: Point): Boolean = {
+    l.exists(_.position == p)
   }
 
-  def last(): SnakeBlock = {
+  def head: Spot = {
+    l.head
+  }
+
+  def last: Spot = {
     l.last
   }
 
-  override def change(property: CanvasElementModifier[Spot]): Unit = {
-    l.foreach(x => x.change(property.asInstanceOf[CanvasElementModifier[Spot]]))
+  def size: Int = {
+    l.length
   }
 
-  def move(p: Point): Unit = {
-    var old = l.head.point
-    l.head.move(p)
-    for (sb <- l.tail) {
-      val nOld: Point = sb.point
-      sb.move(old)
-      old = nOld
+  def remove(p: Point): Unit = {
+    l = l.filterNot(_.position == p)
+  }
+
+  override def change(property: CanvasElementModifier[A]): Unit = {
+    l.foreach(x => x.change(property.asInstanceOf[CanvasElementModifier[x.A]]))
+  }
+
+  override def move(p: Point): Unit = {
+    if (l.nonEmpty) {
+      val newPosition = Point(l.head.position.x, l.head.position.y)
+      l.head.move(p)
+      ComposedSpot(l.tail).move(newPosition)
     }
   }
 }
@@ -91,7 +117,7 @@ object Extends {
     type A = T
 
     def change(property: CanvasElementModifier[A]): Unit = {
-      s.foreach(x => x.change(property.asInstanceOf[CanvasElementModifier[Spot]]))
+      s.foreach(x => x.change(property.asInstanceOf[CanvasElementModifier[x.A]]))
     }
   }
 }
@@ -100,7 +126,9 @@ object Extends {
 case class Grid(width: Int, height: Int, wall_top: Array[Wall],
                 wall_bottom: Array[Wall], wall_right: Array[Wall],
                 wall_left: Array[Wall], field: Array[Array[Empty]]) {
+
   val spots: Array[Array[Spot]] = Array.ofDim[Spot](height, width)
+
   for (i <- 0 until height; j <- 0 until width) {
     if (i == 0) {
       spots(i)(j) = wall_top(j)

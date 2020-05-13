@@ -28,8 +28,8 @@ object Main {
     val height = 20 // Number of rows on the grid (with walls).
     val width = 20 // Number of columns on the grid (with walls).
     val canvasy = new Canvasy(canvas)
-    val numberMaxApple = 2 // Maximum concurrent number of apples on the field.
-    var numberApple = 0 // Current number of apples on the field.
+    val maxApples = 2 // Maximum concurrent number of apples on the field.
+    val apples: ComposedSpot[Apple] = ComposedSpot[Apple](Seq[Apple]()) // List of apples on the field.
     var score = 0 // Score of the player (number of apples eaten).
     val random = new scala.util.Random // RNG.
     var lives = 1 // Number of lives.
@@ -56,11 +56,27 @@ object Main {
 
     // The snake (starts off at size 1, in the middle of the playing field).
     val middle: Point = Point((height - height%2) / 2, (width - width%2) / 2)
-    val snake: Snake = Snake(List(SnakeBlock(middle, spotSize)))
+    val snake: ComposedSpot[Snake] = ComposedSpot[Snake](List(Snake(middle, spotSize)))
     var direction = Point(1, 0) // Direction of the snake (initially, to the right).
-    grid.spots((height - height%2) / 2)((width - width%2) / 2) = snake(0)
+    grid.spots(middle.x.toInt)(middle.y.toInt) = snake.head
 
     snake change Color(snakeColor)
+
+    def generateApples(): Unit = {
+      while (apples.size < maxApples) {
+        var applePosition = Point(random.nextInt(height - 2) + 1, random.nextInt(width - 2) + 1)
+        while (snake.containsPosition(applePosition) || apples.containsPosition(applePosition)) {
+          applePosition = Point(random.nextInt(height - 2) + 1, random.nextInt(width - 2) + 1)
+        }
+        val apple = Apple(applePosition, spotSize)
+        apple change Color(appleColor)
+        grid.spots(applePosition.x.toInt)(applePosition.y.toInt) = apple
+        apples prepend apple
+      }
+    }
+
+    generateApples()
+
     canvasy.drawGrid(grid)
 
     // Detect key presses.
@@ -92,120 +108,40 @@ object Main {
     // Main game loop.
     val gameLoop = () => {
       direction = update()
-      val newHeadPos: Point = snake(0).point + direction
+      val newHeadPos: Point = snake.head.position + direction
       val newSpot: Spot = grid.spots(newHeadPos.x.toInt)(newHeadPos.y.toInt)
       var elongate: Boolean = false
       newSpot match {
         case _: Apple =>
-          numberApple -= 1
+          apples.remove(newHeadPos)
           score += 1
           elongate = true
-        case _: Wall =>
+        case _: Wall | _: Snake =>
           lives -= 1
-        case _: SnakeBlock =>
-          lives -= 1
-          snake change Color("blue")
+          if (lives == 0) {
+            // do something
+          }
         case _: Empty =>
         case _ => throw new UnsupportedOperationException
       }
 
       if (elongate) {
-        val newSnakeBlock: SnakeBlock = SnakeBlock(snake.last().point, spotSize)
+        val newSnakeBlock: Snake = Snake(newHeadPos, spotSize)
         newSnakeBlock change Color(snakeColor)
-        snake += newSnakeBlock
+        snake prepend newSnakeBlock
       } else {
-        val lastPosition: Point = snake.last().point
+        val lastPosition: Point = snake.last.position
         grid.spots(lastPosition.x.toInt)(lastPosition.y.toInt) = field(lastPosition.x.toInt - 1)(lastPosition.y.toInt - 1)
+        snake.move(newHeadPos)
       }
 
-      snake.move(newHeadPos)
+      snake.foreach(sb => grid.spots(sb.position.x.toInt)(sb.position.y.toInt) = sb)
 
-      for (sb <- snake) {
-        grid.spots(sb.point.x.toInt)(sb.point.y.toInt) = sb
-      }
+      generateApples()
 
       canvasy.drawGrid(grid)
-
-      if (numberApple < numberMaxApple) {
-        var applePosition = Point(random.nextInt(spotSize - 2) + 1, random.nextInt(spotSize - 2) + 1)
-        while (snake.containsPosition(applePosition)) {
-          applePosition = Point(random.nextInt(spotSize - 2) + 1, random.nextInt(spotSize - 2) + 1)
-        }
-        val apple = Apple(applePosition, spotSize)
-        apple change Color(appleColor)
-        grid.spots(applePosition.x.toInt)(applePosition.y.toInt) = apple
-        canvasy.drawGrid(grid)
-        numberApple += 1
-      }
     }
 
     dom.window.setInterval(gameLoop, 100)
   }
-
-  /*def scalaJSDemo(c: html.Canvas): Unit = {
-    val ctx = c.getContext("2d").asInstanceOf[dom.CanvasRenderingContext2D]
-    val w = 300
-    c.width = w
-    c.height = w
-
-    ctx.strokeStyle = "red"
-    ctx.lineWidth = 3
-    ctx.beginPath()
-    ctx.moveTo(w/3, 0)
-    ctx.lineTo(w/3, w/3)
-    ctx.moveTo(w*2/3, 0)
-    ctx.lineTo(w*2/3, w/3)
-    ctx.moveTo(w, w/2)
-    ctx.arc(w/2, w/2, w/2, 0, 3.14)
-
-    ctx.stroke()
-  }*/
-
-  /*/*
-   * TODO: When you've done the first part, you should be able to uncomment this
-   *       method and call it without problems
-   */
-  def useMySuperDSL(canvas: html.Canvas): Unit = {
-    // After you've done the first part of the project, everything should
-    // compile and do the expected behaviour
-    val canvasy = new Canvasy(canvas)
-
-    val circles = Array.fill(4)(Circle(50, 100, 100))
-    val rectangles = Array.tabulate(5)(i => Rectangle(i*10, i*10, 10, 30))
-
-    canvasy += circles
-    canvasy += rectangles
-
-    // First we can modify property of Shapes by modifying their property directly
-    circles(0) color "red"
-    rectangles(0) strokeWidth 10
-    rectangles(1) moveX 10
-
-    // We should also be able to do the same on a group of shapes
-    // (list, array, iterables, ...)
-    print(circles.isInstanceOf[Array[Circle]])
-    circles moveX 20
-
-    // We can also change property using the CanvasElementModifier trait
-    circles change Color("blue")
-
-    // We can group the shapes easily with the keyword and
-    val superGroupOfShapes = circles and rectangles
-
-    // And of course, we have foreach/map/flatmap available
-    (rectangles(0) and circles(1)).foreach(_ moveY 30)
-
-    // We should also be able to use common operators to group shapes
-    val anotherSuperGroup = rectangles ++ circles
-
-    // We can get back the elements by their index
-    val s = anotherSuperGroup(0)
-
-    // Take care that some property change should not compile, like this one
-    // (rectangles(0) + circles(0)) change Width(30)
-    // because Circles have no width
-
-    // You can have a nice draw function to draw all of this on the canvas
-    canvasy.draw()
-  }*/
 }

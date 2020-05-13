@@ -10,9 +10,9 @@ sealed trait Shape {
 
   def change(property: CanvasElementModifier[A]): Unit
 
-  def moveX(v: Int): Unit = this.moveX(v)
+  def moveX(v: Int): Unit = moveX(v)
 
-  def moveY(v: Int): Unit = this.moveY(v)
+  def moveY(v: Int): Unit = moveY(v)
 }
 
 
@@ -85,11 +85,11 @@ object Extends {
     type A = T
 
     def moveX(i: Int): Unit = {
-      s.foreach(sh => sh.moveX(i))
+      s.foreach(_.moveX(i))
     }
 
     def moveY(i: Int): Unit = {
-      s.foreach(sh => sh.moveY(i))
+      s.foreach(_.moveY(i))
     }
 
     def change(property: CanvasElementModifier[A]): Unit = {

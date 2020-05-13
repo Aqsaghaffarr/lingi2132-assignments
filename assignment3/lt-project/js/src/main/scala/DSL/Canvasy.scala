@@ -15,19 +15,19 @@ class Canvasy(canvas: html.Canvas) {
         case w: Wall =>
           ctx.fillStyle = w.color
           ctx.lineWidth = w.strokeWidth
-          ctx.fillRect(w.point.x * w.size, w.point.y * w.size, w.size, w.size)
+          ctx.fillRect(w.position.x * w.size, w.position.y * w.size, w.size, w.size)
         case a: Apple =>
           ctx.fillStyle = a.color
           ctx.lineWidth = a.strokeWidth
-          ctx.fillRect(a.point.x * a.size, a.point.y * a.size, a.size, a.size)
+          ctx.fillRect(a.position.x * a.size, a.position.y * a.size, a.size, a.size)
         case e: Empty =>
           ctx.fillStyle = e.color
           ctx.lineWidth = e.strokeWidth
-          ctx.fillRect(e.point.x * e.size, e.point.y * e.size, e.size, e.size)
-        case s: SnakeBlock =>
+          ctx.fillRect(e.position.x * e.size, e.position.y * e.size, e.size, e.size)
+        case s: Snake =>
           ctx.fillStyle = s.color
           ctx.lineWidth = s.strokeWidth
-          ctx.fillRect(s.point.x * s.size, s.point.y * s.size, s.size, s.size)
+          ctx.fillRect(s.position.x * s.size, s.position.y * s.size, s.size, s.size)
         case _ => throw new UnsupportedOperationException
       }
     }
