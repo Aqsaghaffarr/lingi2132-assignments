@@ -84,8 +84,6 @@ object Main {
 
     canvasy.drawGrid(grid)
 
-    // Detect key presses.
-
     // Update snake direction.
     def update(): Point = {
       if (Keyboard.isHoldingLeft && direction != Point(1, 0)) {
@@ -105,43 +103,45 @@ object Main {
 
     // Main game loop.
     val gameLoop = () => {
-      if (alive) {
-        direction = update()
-        val newHeadPos: Point = snake.head.position + direction
-        val newSpot: Spot = grid.spots(newHeadPos.x.toInt)(newHeadPos.y.toInt)
-        var elongate: Boolean = false
-        newSpot match {
-          case _: Apple =>
-            apples.remove(newHeadPos)
-            score.score += 1
-            elongate = true
-          case _: Wall | _: Snake =>
-            lives -= 1
-            if (lives == 0) {
-              canvasy.showScore(score)
-            }
-            alive = false
-          case _: Empty =>
-          case _ => throw new UnsupportedOperationException
-        }
-
-        if (alive) {
-          if (elongate) {
-            val newSnakeBlock: Snake = Snake(newHeadPos, spotSize)
-            newSnakeBlock change Color(snakeColor)
-            snake prepend newSnakeBlock
-          } else {
-            val lastPosition: Point = snake.last.position
-            grid.spots(lastPosition.x.toInt)(lastPosition.y.toInt) = field(lastPosition.x.toInt - 1)(lastPosition.y.toInt - 1)
-            snake.move(newHeadPos)
+      direction = update()
+      val newHeadPos: Point = snake.head.position + direction
+      val newSpot: Spot = grid.spots(newHeadPos.x.toInt)(newHeadPos.y.toInt)
+      var elongate: Boolean = false
+      newSpot match {
+        case _: Apple =>
+          apples.remove(newHeadPos)
+          score.score += 1
+          elongate = true
+        case _: Wall | _: Snake =>
+          lives -= 1
+          if (lives == 0) {
+            canvasy.showScore(score)
           }
+          alive = false
+        case _: Empty =>
+        case _ => throw new UnsupportedOperationException
+      }
 
-          snake.foreach(sb => grid.spots(sb.position.x.toInt)(sb.position.y.toInt) = sb)
-
-          generateApples()
-          canvasy.drawGrid(grid)}
+      if (alive) {
+        if (elongate) {
+          val newSnakeBlock: Snake = Snake(newHeadPos, spotSize)
+          newSnakeBlock change Color(snakeColor)
+          snake prepend newSnakeBlock
+        } else {
+          val lastPosition: Point = snake.last.position
+          grid.spots(lastPosition.x.toInt)(lastPosition.y.toInt) = field(lastPosition.x.toInt - 1)(lastPosition.y.toInt - 1)
+          snake.move(newHeadPos)
         }
-      else if (Keyboard.keysDown.contains(KeyCode.Space)) {
+
+        snake.foreach(sb => grid.spots(sb.position.x.toInt)(sb.position.y.toInt) = sb)
+
+        generateApples()
+        canvasy.drawGrid(grid)
+      }
+    }
+
+    val reset = () => {
+      if (Keyboard.keysDown.contains(KeyCode.Space)){
         val w = canvas.width
         val h = canvas.height
         document.body.removeChild(canvas)
@@ -149,6 +149,14 @@ object Main {
       }
     }
 
-    dom.window.setInterval(gameLoop, 100)
+    val decision = () => {
+      if (alive) {
+        gameLoop()
+      } else {
+        reset()
+      }
+    }
+
+    dom.window.setInterval(decision, 100)
   }
 }
