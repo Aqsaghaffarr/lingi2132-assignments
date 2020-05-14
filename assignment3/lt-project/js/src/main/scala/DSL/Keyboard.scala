@@ -18,4 +18,8 @@ object Keyboard {
   def isHoldingUp: Boolean = keysDown.contains(38)
   def isHoldingRight: Boolean = keysDown.contains(39)
   def isHoldingDown: Boolean = keysDown.contains(40)
+  def isHoldingS: Boolean = keysDown.contains(83)
+  def isHoldingX: Boolean = keysDown.contains(88)
+  def isHoldingK: Boolean = keysDown.contains(75)
+  def isHoldingM: Boolean = keysDown.contains(188)
 }
