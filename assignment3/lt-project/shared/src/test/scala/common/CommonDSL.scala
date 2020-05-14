@@ -53,7 +53,7 @@ object CommonDSL {
   def newScore(): Score = {
     val x = Random.nextInt(20)
     val y = Random.nextInt(20)
-    Score(Point(x, y), 0, 0, "test")
+    Score(Point(x, y), 0, 0)
   }
 
   def newWallList(): List[Wall] = {
