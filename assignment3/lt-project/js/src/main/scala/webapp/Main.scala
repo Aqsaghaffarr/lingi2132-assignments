@@ -6,8 +6,6 @@ import DSL.{Color, _}
 import org.scalajs.dom
 import org.scalajs.dom.ext.KeyCode
 import org.scalajs.dom.{document, html}
-
-import scala.collection.mutable
 //import DSLDemo.Extends._
 
 object Main {
@@ -33,7 +31,7 @@ object Main {
     val width = 20 // Number of columns on the grid (with walls).
     val canvasy = new Canvasy(canvas)
     val maxApples = 2 // Maximum concurrent number of apples on the field.
-    val apples: ComposedSpot[Apple] = ComposedSpot[Apple](Seq[Apple]()) // List of apples on the field.
+    val apples: ComposedSpot[Apple] = ComposedSpot[Apple](Array[Apple]()) // List of apples on the field.
     val score = Score(Point(height/2 * spotSize, width/2 * spotSize - 15), spotSize, 0, "Your score is") // Score of the player (number of apples eaten).
     val random = new scala.util.Random // RNG.
     var lives = 1 // Number of lives.
@@ -43,25 +41,26 @@ object Main {
     var alive: Boolean = true
 
     // Walls.
-    val wallTop: Array[Wall] = Array.tabulate(width)(i => Wall(Point(0, i), spotSize))
-    val wallRight: Array[Wall] = Array.tabulate(height - 2)(i => Wall(Point(i + 1, 0), spotSize))
-    val wallBottom: Array[Wall] = Array.tabulate(width)(i => Wall(Point(height - 1, i), spotSize))
-    val wallLeft: Array[Wall] = Array.tabulate(height - 2)(i => Wall(Point(i + 1, width - 1), spotSize))
+    val wallTop: ComposedSpot[Wall] = ComposedSpot(Array.tabulate(width)(i => Wall(Point(0, i), spotSize)))
+    val wallRight: ComposedSpot[Wall] = ComposedSpot(Array.tabulate(height - 2)(i => Wall(Point(i + 1, 0), spotSize)))
+    val wallBottom: ComposedSpot[Wall] = ComposedSpot(Array.tabulate(width)(i => Wall(Point(height - 1, i), spotSize)))
+    val wallLeft: ComposedSpot[Wall] = ComposedSpot(Array.tabulate(height - 2)(i => Wall(Point(i + 1, width - 1), spotSize)))
 
     // Field.
-    val field : Array[Array[Empty]] = new Array[Array[Empty]](height - 2)
+    val field: ComposedSpot2D[Empty] = ComposedSpot2D(Array.ofDim[Empty](height, width))
     // Define the white squares that make up the playing field.
-    for (i <- field.indices) {
-      field(i) = Array.tabulate(height - 2)(j => Empty(Point(i + 1, j + 1), spotSize))
-      field(i) change Color(emptyColor)
+    for (i <- 0 until height; j <- 0 until width) {
+      field(i)(j) = Empty(Point(i + 1, j + 1), spotSize)
+
     }
+    field change Color(emptyColor)
 
     // Define the grid, containing both the walls and the field.
     val grid = Grid(width, height, wallTop, wallBottom, wallRight, wallLeft, field)
 
     // The snake (starts off at size 1, in the middle of the playing field).
     val middle: Point = Point((height - height%2) / 2, (width - width%2) / 2)
-    val snake: ComposedSpot[Snake] = ComposedSpot[Snake](List(Snake(middle, spotSize)))
+    val snake: ComposedSpot[Snake] = ComposedSpot[Snake](Array(Snake(middle, spotSize)))
     var direction = Point(1, 0) // Direction of the snake (initially, to the right).
     grid.spots(middle.x.toInt)(middle.y.toInt) = snake.head
 
@@ -149,13 +148,7 @@ object Main {
       }
     }
 
-    val decision = () => {
-      if (alive) {
-        gameLoop()
-      } else {
-        reset()
-      }
-    }
+    val decision = () => if (alive) gameLoop() else reset()
 
     dom.window.setInterval(decision, 100)
   }

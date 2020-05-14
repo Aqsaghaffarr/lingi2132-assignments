@@ -70,7 +70,6 @@ case class ComposedSpot[T <: Spot](var l: Seq[T]) extends Spot {
 
   def flatMap(f: Spot => Iterable[Spot]): ComposedSpot[Spot] = ComposedSpot(l.flatMap(f))
 
-
   def foreach[B](f: Spot => B): Unit = {
     if (l.nonEmpty) {
       f(l.head)
@@ -88,40 +87,50 @@ case class ComposedSpot[T <: Spot](var l: Seq[T]) extends Spot {
     }
   }
 
-  def prepend(sb: A): Unit = {
-    l = sb +: l
-  }
+  def prepend(sb: A): Unit = l = sb +: l
 
-  def contains(p: Point): Boolean = {
-    l.map(_.position).contains(p)
-  }
+  def contains(p: Point): Boolean = l.map(_.position).contains(p)
 
-  def head: Spot = {
-    l.head
-  }
+  def head: Spot = l.head
 
-  def last: Spot = {
-    l.last
-  }
+  def last: Spot = l.last
 
-  def size: Int = {
-    l.length
-  }
+  def size: Int = l.length
 
-  def remove(p: Point): Unit = {
-    l = l.filterNot(_.position == p)
-  }
+  def remove(p: Point): Unit = l = l.filterNot(_.position == p)
 
   override def change(property: CanvasElementModifier[A]): Unit = {
     l.foreach(x => x.change(property.asInstanceOf[CanvasElementModifier[x.A]]))
   }
 
   override def move(p: Point): Unit = {
-    if (l.nonEmpty) {
-      val newPosition = Point(l.head.position.x, l.head.position.y)
-      l.head.move(p)
-      ComposedSpot(l.tail).move(newPosition)
+    var oldPosition: Point = p
+    for (s <- l) {
+      val newPosition: Point = Point(s.position.x, s.position.y)
+      s.move(oldPosition)
+      oldPosition = newPosition
     }
+  }
+}
+
+
+case class ComposedSpot2D[T <: Spot](spots: Array[Array[T]]) extends Spot {
+  type A = T
+
+  case class ArrayMapper(i: Int) {
+    def apply(j: Int): Spot = spots(i)(j)
+
+    def update(j: Int, v: T): Unit = spots(i)(j) = v
+
+    def indices: Range = spots(i).indices
+  }
+
+  def apply(i: Int): ArrayMapper = ArrayMapper(i)
+
+  def indices: Range = spots.indices
+
+  override def change(property: CanvasElementModifier[A]): Unit = {
+    spots.foreach(_.foreach(x => x.change(property.asInstanceOf[CanvasElementModifier[x.A]])))
   }
 }
 
@@ -132,28 +141,6 @@ object Extends {
 
     def change(property: CanvasElementModifier[A]): Unit = {
       s.foreach(x => x.change(property.asInstanceOf[CanvasElementModifier[x.A]]))
-    }
-  }
-}
-
-
-case class Grid(width: Int, height: Int, wall_top: Array[Wall],
-                wall_bottom: Array[Wall], wall_right: Array[Wall],
-                wall_left: Array[Wall], field: Array[Array[Empty]]) {
-
-  val spots: Array[Array[Spot]] = Array.ofDim[Spot](height, width)
-
-  for (i <- 0 until height; j <- 0 until width) {
-    if (i == 0) {
-      spots(i)(j) = wall_top(j)
-    } else if (i == height - 1) {
-      spots(i)(j) = wall_bottom(j)
-    } else if (j == 0) {
-      spots(i)(j) = wall_right(i-1)
-    } else if (j == width - 1) {
-      spots(i)(j) = wall_left(i-1)
-    } else {
-      spots(i)(j) = field(i-1)(j-1)
     }
   }
 }
