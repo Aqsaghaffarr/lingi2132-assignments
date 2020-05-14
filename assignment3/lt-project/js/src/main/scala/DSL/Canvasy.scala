@@ -10,6 +10,9 @@ class Canvasy(canvas: html.Canvas) {
   val ctx: CanvasRenderingContext2D = canvas.getContext("2d").asInstanceOf[dom.CanvasRenderingContext2D]
 
   def drawGrid(grid: Grid): Unit = {
+
+    var ball: Ball = null
+
     for (i <- grid.spots.indices; j <- grid.spots(0).indices) {
       grid.spots(i)(j) match {
         case w: Wall =>
@@ -28,17 +31,35 @@ class Canvasy(canvas: html.Canvas) {
           ctx.fillStyle = s.color
           ctx.lineWidth = s.strokeWidth
           ctx.fillRect(s.position.x * s.size, s.position.y * s.size, s.size, s.size)
+        case b: Ball =>
+          ball = b
+        case p: Player =>
+          ctx.fillStyle = p.color
+          ctx.lineWidth = p.strokeWidth
+          ctx.fillRect(p.position.x * p.size, p.position.y * p.size, p.size, p.size)
         case _ => throw new UnsupportedOperationException
       }
     }
+
+    if (ball != null) {
+      ctx.fillStyle = ball.color
+      ctx.lineWidth = ball.strokeWidth
+      ctx.beginPath()
+      ctx.arc(ball.position.x * ball.size, ball.position.y * ball.size, ball.size, 0, Math.PI * 2)
+      ctx.fill()
+    }
+  }
+
+  def showMessage(message: Message): Unit = {
+    val text = message.text
+    ctx.font = message.font
+    ctx.textAlign = "center"
+    ctx.fillText(text, message.position.x, message.position.y)
   }
 
   def showScore(score: Score): Unit = {
-    val text = score.text + ": " + score.score.toString
     ctx.font = score.font
     ctx.textAlign = "center"
-    ctx.fillText(text, score.position.x, score.position.y)
-    ctx.font = "14pt Helvetica"
-    ctx.fillText("Press [space] to try again", score.position.x, score.position.y + 30)
+    ctx.fillText(score.score.toString, score.position.x, score.position.y)
   }
 }

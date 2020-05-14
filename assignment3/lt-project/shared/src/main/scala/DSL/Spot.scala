@@ -53,9 +53,28 @@ case class Snake(override val position: Point, size: Int) extends Spot with Spot
   override def change(property: CanvasElementModifier[A]): Unit = property.change(this)
 }
 
+case class Ball(override val position: Point, size: Int) extends Spot with SpotAttributes {
+  type A = Ball
 
-case class Score(override val position: Point, size: Int, var score: Int, text: String) extends Spot with SpotAttributes {
+  override def change(property: CanvasElementModifier[A]): Unit = property.change(this)
+}
+
+case class Player(override val position: Point, size: Int) extends Spot with SpotAttributes {
+  type A = Player
+
+  override def change(property: CanvasElementModifier[A]): Unit = property.change(this)
+}
+
+case class Score(override val position: Point, size: Int, var score: Int) extends Spot with SpotAttributes {
   type A = Score
+
+  var font = "20px Helvetica"
+
+  override def change(property: CanvasElementModifier[A]): Unit = property.change(this)
+}
+
+case class Message(override val position: Point, size: Int, text: String) extends Spot with SpotAttributes {
+  type A = Message
 
   var font = "20px Helvetica"
 
@@ -110,6 +129,10 @@ case class ComposedSpot[T <: Spot](var l: Seq[T]) extends Spot {
       s.move(oldPosition)
       oldPosition = newPosition
     }
+  }
+
+  def translate(direction: Point): Unit = {
+    l.foreach(x => x.move(x.position + direction))
   }
 }
 
