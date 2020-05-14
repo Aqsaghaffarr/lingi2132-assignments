@@ -70,6 +70,20 @@ class DSLTest extends AnyFunSuite with Matchers {
     }
   }
 
+  test("Change font of score via keyword") {
+    val score = newScore()
+    val newFont = "69px Arial"
+    score.font = newFont
+    score.font shouldBe newFont
+  }
+
+  test("Change font of score via property") {
+    val score = newScore()
+    val newFont = "69px Arial"
+    score change Font(newFont)
+    score.font shouldBe newFont
+  }
+
   test("Change color of spots via property on ComposedSpot") {
     val wall = newWall()
     val empty = newEmpty()
@@ -96,6 +110,30 @@ class DSLTest extends AnyFunSuite with Matchers {
     for (spot <- l) {
       spot.strokeWidth shouldBe newStrokeWidth
     }
+  }
+
+  test("Change font on wall") {
+    val w = newWall()
+    val newFont = "69px Arial"
+    assertTypeError("w change Font(newFont)")
+  }
+
+  test("Change font on apple") {
+    val a = newApple()
+    val newFont = "69px Arial"
+    assertTypeError("a change Font(newFont)")
+  }
+
+  test("Change font on empty") {
+    val e = newEmpty()
+    val newFont = "69px Arial"
+    assertTypeError("e change Font(newFont)")
+  }
+
+  test("Change font on snake") {
+    val s = newSnake()
+    val newFont = "69px Arial"
+    assertTypeError("s change Font(newFont)")
   }
 
   test("Moving a snake") {
@@ -129,6 +167,29 @@ class DSLTest extends AnyFunSuite with Matchers {
     }
   }
 
+  test("Flatmap on ComposedSpot") {
+    val el = newEmptyList()
+    val expected = ComposedSpot(el)
+    val g = ComposedSpot(el)
+    val newG = g.flatMap(e => List(e))
+    for (i <- el.indices) {
+      g(i) shouldBe el(i)
+      newG(i) shouldBe expected(i)
+      assert(g(i) == newG(i))
+    }
+  }
+
+  test("Map/flatmap relationship on ComposedSpot") {
+    val el = newEmptyList()
+    val expected = List.tabulate(el.length)(i => Wall(Point(el(i).position.x, el(i).position.y), 20))
+    val g = ComposedSpot(el)
+    val g1 = g.map(e => Wall(Point(e.asInstanceOf[Empty].position.x, e.asInstanceOf[Empty].position.y), 20))
+    val g2 = g.flatMap(e => List(Wall(Point(e.asInstanceOf[Empty].position.x, e.asInstanceOf[Empty].position.y), 20)))
+    for (i <- el.indices) {
+      g1(i) shouldBe g2(i)
+    }
+  }
+
   test("Prepend in ComposedSpot") {
     val l = newWallList()
     val elem = newWall()
@@ -159,5 +220,23 @@ class DSLTest extends AnyFunSuite with Matchers {
     for (i <- oldl.indices) {
       g(i) shouldBe oldl(i)
     }
+  }
+
+  test("Change font on correct ComposedSpot") {
+    val s = newScoreList()
+    val g = ComposedSpot(s)
+    val newFont = "69px Arial"
+    g change Font(newFont)
+    for (i <- s.indices) {
+      g(i).asInstanceOf[Score].font shouldBe newFont
+    }
+  }
+
+  test("Change font on mixed ComposedSpot") {
+    val w = newWall()
+    val s = newSnake()
+    val g = ComposedSpot(List(w, s))
+    val newFont = "69px Arial"
+    assertTypeError("g change Font(newFont)")
   }
 }

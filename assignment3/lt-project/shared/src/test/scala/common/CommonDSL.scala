@@ -50,6 +50,12 @@ object CommonDSL {
     Snake(p, spotSize)
   }
 
+  def newScore(): Score = {
+    val x = Random.nextInt(20)
+    val y = Random.nextInt(20)
+    Score(Point(x, y), 0, 0, "test")
+  }
+
   def newWallList(): List[Wall] = {
     val size = 5 + Random.nextInt(10)
     List.fill(size)(newWall())
@@ -68,6 +74,11 @@ object CommonDSL {
   def newSnakeList(): List[Snake] = {
     val size = 5 + Random.nextInt(10)
     List.fill(size)(newSnake())
+  }
+
+  def newScoreList(): List[Score] = {
+    val size = 5 + Random.nextInt(10)
+    List.fill(size)(newScore())
   }
 
 }
