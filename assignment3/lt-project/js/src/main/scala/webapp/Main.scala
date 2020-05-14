@@ -85,25 +85,16 @@ object Main {
     canvasy.drawGrid(grid)
 
     // Detect key presses.
-    val keysDown = mutable.HashMap[Int, Boolean]()
-
-    dom.window.addEventListener("keydown", (e: dom.KeyboardEvent) => {
-      keysDown += e.keyCode -> true
-    }, useCapture = false)
-
-    dom.window.addEventListener("keyup", (e: dom.KeyboardEvent) => {
-      keysDown -= e.keyCode
-    }, useCapture = false)
 
     // Update snake direction.
     def update(): Point = {
-      if (keysDown.contains(KeyCode.Left) && direction != Point(1, 0)) {
+      if (Keyboard.isHoldingLeft && direction != Point(1, 0)) {
         Point(-1, 0)
-      } else if (keysDown.contains(KeyCode.Right) && direction != Point(-1, 0)) {
+      } else if (Keyboard.isHoldingRight && direction != Point(-1, 0)) {
         Point(1, 0)
-      } else if (keysDown.contains(KeyCode.Up) && direction != Point(0, 1)) {
+      } else if (Keyboard.isHoldingUp && direction != Point(0, 1)) {
         Point(0, -1)
-      } else if (keysDown.contains(KeyCode.Down) && direction != Point(0, -1)) {
+      } else if (Keyboard.isHoldingDown && direction != Point(0, -1)) {
         Point(0, 1)
       } else if (alive) {
         direction
@@ -150,7 +141,7 @@ object Main {
           generateApples()
           canvasy.drawGrid(grid)}
         }
-      else if (keysDown.contains(KeyCode.Space)) {
+      else if (Keyboard.keysDown.contains(KeyCode.Space)) {
         val w = canvas.width
         val h = canvas.height
         document.body.removeChild(canvas)
