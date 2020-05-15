@@ -3,6 +3,7 @@ package DSL
 import org.scalajs.dom
 import scala.collection.mutable
 
+// Define all interactions with the keyboard.
 object Keyboard {
   val keysDown: mutable.Map[Int, Boolean] = mutable.HashMap[Int, Boolean]()
 

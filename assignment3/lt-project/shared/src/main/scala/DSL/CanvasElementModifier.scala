@@ -5,7 +5,7 @@ trait CanvasElementModifier[-ApplyOn <: Spot] {
   def change(x: ApplyOn): Unit
 }
 
-
+// Change color of spot.
 case class Color(col: String) extends CanvasElementModifier[Spot] {
   override def change(x: Spot): Unit = {
     x match {
@@ -18,7 +18,7 @@ case class Color(col: String) extends CanvasElementModifier[Spot] {
   }
 }
 
-
+// Change stroke width of spot.
 case class StrokeWidth(n: Int) extends CanvasElementModifier[Spot] {
   override def change(x: Spot): Unit = {
     x match {
@@ -31,7 +31,7 @@ case class StrokeWidth(n: Int) extends CanvasElementModifier[Spot] {
   }
 }
 
-
+// Change font of spot.
 case class Font(font: String) extends CanvasElementModifier[Score] {
   override def change(x: Score): Unit = x.font = font
 }

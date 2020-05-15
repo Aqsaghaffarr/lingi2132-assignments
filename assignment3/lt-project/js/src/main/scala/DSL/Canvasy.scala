@@ -9,8 +9,9 @@ class Canvasy(canvas: html.Canvas) {
 
   val ctx: CanvasRenderingContext2D = canvas.getContext("2d").asInstanceOf[dom.CanvasRenderingContext2D]
 
+  // Draw grid (2d array).
+  // Ball comes last because otherwise the shape is fucked up.
   def drawGrid(grid: Grid): Unit = {
-
     var ball: Ball = null
 
     for (i <- grid.spots.indices; j <- grid.spots(0).indices) {
@@ -50,6 +51,7 @@ class Canvasy(canvas: html.Canvas) {
     }
   }
 
+  // Show a message object.
   def showMessage(message: Message): Unit = {
     val text = message.text
     ctx.font = message.font
@@ -57,6 +59,7 @@ class Canvasy(canvas: html.Canvas) {
     ctx.fillText(text, message.position.x, message.position.y)
   }
 
+  // Show a score object.
   def showScore(score: Score): Unit = {
     ctx.font = score.font
     ctx.textAlign = "center"

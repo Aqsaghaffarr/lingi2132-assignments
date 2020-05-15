@@ -6,7 +6,7 @@ sealed trait Spot {
 
   val position: Point = Point(0, 0)
 
-  def change(property: CanvasElementModifier[A]): Unit
+  def change(property: CanvasElementModifier[A]): Unit = property.change(this.asInstanceOf[A])
 
   def move(p: Point): Unit = {
     position.x = p.x
@@ -25,63 +25,52 @@ trait SpotAttributes {
 }
 
 
+// Spot representing a wall.
 case class Wall(override val position: Point, size: Int) extends Spot with SpotAttributes {
   type A = Wall
-
-  override def change(property: CanvasElementModifier[A]): Unit = property.change(this)
 }
 
 
+// Spot representing an apple.
 case class Apple(override val position: Point, size: Int) extends Spot with SpotAttributes {
   type A = Apple
-
-  override def change(property: CanvasElementModifier[A]): Unit = property.change(this)
 }
 
-
+// Spot representing an empty square.
 case class Empty(override val position: Point, size: Int) extends Spot with SpotAttributes {
   type A = Empty
-
-
-  override def change(property: CanvasElementModifier[A]): Unit = property.change(this)
 }
 
-
+// Spot representing a snake block.
 case class Snake(override val position: Point, size: Int) extends Spot with SpotAttributes {
   type A = Snake
-
-  override def change(property: CanvasElementModifier[A]): Unit = property.change(this)
 }
 
+// Spot representing a ball.
 case class Ball(override val position: Point, size: Int) extends Spot with SpotAttributes {
   type A = Ball
-
-  override def change(property: CanvasElementModifier[A]): Unit = property.change(this)
 }
 
+// Spot representing a paddle block.
 case class Player(override val position: Point, size: Int) extends Spot with SpotAttributes {
   type A = Player
-
-  override def change(property: CanvasElementModifier[A]): Unit = property.change(this)
 }
 
+// Spot representing a score.
 case class Score(override val position: Point, size: Int, var score: Int) extends Spot with SpotAttributes {
   type A = Score
 
   var font = "20px Helvetica"
-
-  override def change(property: CanvasElementModifier[A]): Unit = property.change(this)
 }
 
+// Spot representing a message.
 case class Message(override val position: Point, size: Int, text: String) extends Spot with SpotAttributes {
   type A = Message
 
   var font = "20px Helvetica"
-
-  override def change(property: CanvasElementModifier[A]): Unit = property.change(this)
 }
 
-
+// ComposedSpot (with a list of Spots).
 case class ComposedSpot[T <: Spot](var l: Seq[T]) extends Spot {
   type A = T
 
@@ -136,20 +125,17 @@ case class ComposedSpot[T <: Spot](var l: Seq[T]) extends Spot {
   }
 }
 
-
+// ComposedSpot2D with a 2D matrix of spots.
 case class ComposedSpot2D[T <: Spot](spots: Array[Array[T]]) extends Spot {
   type A = T
 
   case class ArrayMapper(i: Int) {
     def apply(j: Int): Spot = spots(i)(j)
-
     def update(j: Int, v: T): Unit = spots(i)(j) = v
-
     def indices: Range = spots(i).indices
   }
 
   def apply(i: Int): ArrayMapper = ArrayMapper(i)
-
   def indices: Range = spots.indices
 
   override def change(property: CanvasElementModifier[A]): Unit = {
@@ -157,7 +143,7 @@ case class ComposedSpot2D[T <: Spot](spots: Array[Array[T]]) extends Spot {
   }
 }
 
-
+// Makes the old main file work.
 object Extends {
   implicit class shapeArrayExtend[T <: Spot](s: Array[T]) {
     type A = T

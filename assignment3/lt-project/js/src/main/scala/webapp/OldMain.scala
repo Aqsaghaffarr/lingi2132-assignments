@@ -5,8 +5,9 @@ import DSLDemo.Extends._
 import org.scalajs.dom.{html, document}
 import org.scalajs.dom
 
-object OldMain {
+// Old main file, still works.
 
+object OldMain {
   def _main(args: Array[String]): Unit = {
     val canvas = document.createElement("canvas").asInstanceOf[html.Canvas]
     document.body.appendChild(canvas)
