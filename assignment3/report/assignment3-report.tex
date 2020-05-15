@@ -1,5 +1,5 @@
-\documentclass[journal,onecolumn]{IEEEtran}
-%\usepackage[left=1.25cm,right=1.25cm,top=1.25cm,bottom=1.25cm]{geometry}
+\documentclass[journal,onecolumn, 9pt]{IEEEtran}
+\usepackage[left=1.5cm,right=1.5cm,top=1.5cm,bottom=1.5cm]{geometry}
 \usepackage[utf8]{inputenc}
 \usepackage[english]{babel}
 \usepackage{minted}
@@ -89,6 +89,7 @@ In order to do that, we developed a simple implementation of the well-known Snak
 Section~\ref{sec:functionalities} gives an overview of the various functionalities of our DSL, with documented examples.
 In Section~\ref{sec:evaluation}, we describe various strengths and weaknesses of our DSL.
 Finally, Section~\ref{sec:improvements} gives various further improvements which could be make to extend the existing DSL with more functionality.
+In order to prove the versatility of our DSL, we also wrote a game of Pong with it.
 
 \section{Functionalities}
 \label{sec:functionalities}
@@ -102,8 +103,21 @@ Our final DSL is based around entities called \scala{Spot}s, which represent an 
 Structurally, they are similar to the \scala{Shape}s of the previous exercise.
 \scala{ComposedSpot}s and \scala{ComposedSpot2D}s are one-dimensional and two-dimensional arrays of \scala{Spot}s, and can be used to represent a group of related \scala{Spot}s (such as, for example, the body parts of a snake).
 
+\subsection{List of Functionalities}
+Our proof-of-concept DSL provides multiple different functionalities:
+\begin{itemize}
+	\item A vast library of \scala{Spot}s, which can be extended even further to accomodate game-specific spots (such as a spaceship for Space Invaders or an asteroid for Asteroids).
+	\item An intuitive interaction with the keyboard, abstracted in \texttt{Keyboard.scala}.
+	\item Utilities to combine \scala{Spot}s into lists or even matrices, with appropriate methods to operate on them.
+	\item A simple and concise control structure designed specifically to deal with browser-based games, which enables one to easily switch between games while still maintaining useful properties such as easy displaying of game commands, seamless restarting of games, and concisely-written code.
+	\item A set of operations on \scala{Spot}s which one can extend with ease to change the color, stroke width or font of text and images being drawn on screen, as well as the necessary methods to display this text/image.
+	\item Native support for grid-based games.
+	\item Extensive tests to verify correctness.
+\end{itemize}
+
 \subsection{Properties}
-Many of the properties which make Scala well-suited for building DSLs were used, such as traits, monads, strong and static typing, type inference, implicits, currying, closures, etc.
+Many of the properties which make Scala well-suited for building DSLs were used, such as traits, monads, strong and static typing, type inference, implicits, currying, closures, custom flow control, etc.
+Note that for brevity, some code extracts have been slightly modified.
 
 \subsubsection{Traits}
 Our implementation uses traits in order to define what a \scala{Spot} represents (in our case, it has a position, a \scala{move} method to change its position, and a \scala{change} method to change one its properties).
@@ -112,13 +126,9 @@ Additionally, a second trait is used to represent the attributes of a \scala{Spo
 sealed trait Spot {
 	type A <: Spot
 	val position: Point = Point(0, 0)
-	def change(property: CanvasElementModifier[A]): Unit
-	def move(p: Point): Unit = {
-		position.x = p.x
-		position.y = p.y
-	}
+	def change(property: CanvasElementModifier[A]): Unit = ...
+	def move(p: Point): Unit = ...
 }
-
 trait SpotAttributes {
 	var color = "black"
 	var strokeWidth = 1
@@ -128,18 +138,9 @@ trait SpotAttributes {
 \end{minted}
 
 Traits are also used when defining entities which modify these properties, so-called \scala{CanvasElementModifier}s, which must define a \scala{change} method as well.
-\begin{minted}{scala}
-trait CanvasElementModifier[-ApplyOn <: Spot] {
-	def change(x: ApplyOn): Unit
-}
-\end{minted}
 
 \subsubsection{Monads}
 \scala{ComposedSpot} defines a \scala{map} and \scala{flatMap} method, and is thus a monad.
-\begin{minted}{scala}
-def map(f: Spot => Spot): ComposedSpot[Spot] = ComposedSpot(l.map(f))
-def flatMap(f: Spot => Iterable[Spot]): ComposedSpot[Spot] = ComposedSpot(l.flatMap(f))
-\end{minted}
 
 \subsubsection{Strong/static Typing and Type Inference}
 All throughout our code, explicit and implicit typing are used.
@@ -161,34 +162,41 @@ In order to allow nicer syntax when accessing the members of such a grid, we imp
 \begin{minted}{scala}
 case class ArrayMapper(i: Int) {
 	def apply(j: Int): Spot = spots(i)(j)
-	def update(j: Int, v: T): Unit = spots(i)(j) = v
-	def indices: Range = spots(i).indices
+	...
 }
 def apply(i: Int): ArrayMapper = ArrayMapper(i)
 \end{minted}
 With this, elements of the grid can be accessed as such: \scala{grid(i)(j)}.
 
 \subsubsection{Closures}
-Writing functional code is often simplified by the use of closures, as in the following examples, which checks whether a certain position is contained in a \scala{ComposedSpot}:
+Writing functional code is often simplified by the use of closures, as in the following example, which occurs when generalizing the \scala{GameLauncher} to work with all games.
 \begin{minted}{scala}
-def contains(p: Point): Boolean = l.map(_.position).contains(p)
+val decision: () => Any = () =>
+	if (!hasSeenCommands) keepWaiting()
+	else if (game.alive) gameLoop()
+	else reset()
 \end{minted}
+Often closures are also involved when using call-by-name parameters, as is the case in our code.
+
+\subsubsection{Custom flow control}
+The following example shows the use of our custom ``play with messages'' control structure:
+\begin{minted}{scala}
+play (SnakeGame) withMessages ("Arrow keys to move, space to play", "Press space to restart")
+\end{minted}
+Under the hood, this works very similarly to the \scala{onException} structure that was written during the second Scala practice session, with intermediate classes.
 
 \subsection{Examples of Use}
 Below, we give several examples of usage of the DSL.
-Note that for brevity, the code has been slightly modified (though it serves the exact same function).
 
 \subsubsection{Defining a grid}
-The following code extract defines a grid for the Snake game:% TODO? fix this
+The following code extract defines a grid for the Snake game:
 \begin{minted}{scala}
 // Walls.
 val wallTop = ComposedSpot(Array.tabulate(w)(i => Wall(Point(0, i), size)))
-val wallRight = ComposedSpot(Array.tabulate(h - 2)(i => Wall(Point(i + 1, 0), size)))
-val wallBottom = ComposedSpot(Array.tabulate(w)(i => Wall(Point(h - 1, i), size)))
+...
 val wallLeft = ComposedSpot(Array.tabulate(h - 2)(i => Wall(Point(i + 1, w - 1), size)))
-// Field.
+// Field; define the white squares that make up the playing field.
 val field = ComposedSpot2D(Array.ofDim[Empty](h, w))
-// Define the white squares that make up the playing field.
 for (i <- 0 until h; j <- 0 until w) {
 	field(i)(j) = Empty(Point(i + 1, j + 1), size)
 }
@@ -200,7 +208,7 @@ We start by defining the walls, then the playing field (for which we use the \sc
 It also shows an example of currying, in how the playing field is built.
 
 \subsubsection{Defining a snake}
-The following code extract shows how to define a snake, and how to make it appear on the grid. % TODO? fix this
+The following code extract shows how to define a snake, and how to make it appear on the grid.
 \begin{minted}{scala}
 // The snake (starts off at size 1, in the middle of the playing field).
 val middle = Point((h - h%2) / 2, (w - w%2) / 2)
@@ -212,56 +220,90 @@ snake change Color(snakeColor)
 The snake should start off in the middle of the grid, moving to the right initially.
 We also change its color to be green using the DSL.
 
-\subsubsection{}%TODO pong example
-.
+\subsubsection{Showing Results in Pong}
+The following code snippet shows how results are shown in our Pong implementation, using our DSL which enables one to easily show messages on screen.
+\begin{minted}{scala}
+// Scores of the players.
+val score1 = Score(Point(35 * spotSize, 10 * spotSize), spotSize, 0)
+val score2 = Score(Point(65 * spotSize, 10 * spotSize), spotSize, 0)
+val message = Message(Point(50 * spotSize, 5 * spotSize), spotSize, "Score")
+// Win messages.
+val winMessage1 = Message(Point(50 * spotSize, 30 * spotSize), spotSize, "Player 1 wins!")
+val winMessage2 = Message(Point(50 * spotSize, 30 * spotSize), spotSize, "Player 2 wins!")
+val finalMessage = Message(Point(50 * spotSize, 40 * spotSize), spotSize, ending)
+score1 change Font("15px Helvetica")
+score2 change Font("15px Helvetica")
+...
+canvasy.showScore(score1)
+canvasy.showScore(score2)
+canvasy.showMessage(message)
+...
+if (score1.score > score2.score) canvasy.showMessage(winMessage1)
+else canvasy.showMessage(winMessage2)
+\end{minted}
 
 \subsection{Screenshots}
-Figure~\ref{fig:screenshots} shows some screenshots from the games we wrote using our DSL. %TODO take screenshots
+Figure~\ref{fig:screenshots} shows some screenshots from the games we wrote using our DSL.
 \begin{figure*}
 	\centering
-	\begin{subfigure}[b]{0.475\textwidth}
+	\begin{subfigure}[t]{0.32\textwidth}
 		\centering
-		%\includegraphics[width=\textwidth]{Example-Image}
+		\includegraphics[width=\textwidth]{img/start_message.png}
+		\caption{Start message explaining controls, waiting for user input (with custom message).}
 		\label{fig:sc1}
 	\end{subfigure}
 	\hfill
-	\begin{subfigure}[b]{0.475\textwidth}  
+	\begin{subfigure}[t]{0.32\textwidth}  
 		\centering 
-		%\includegraphics[width=\textwidth]{Example-Image}
+		\includegraphics[width=\textwidth]{img/snake_gameplay.png}
+		\caption{Playing a game of Snake.}
 		\label{fig:sc2}
 	\end{subfigure}
-	\vskip\baselineskip
-	\begin{subfigure}[b]{0.475\textwidth}   
+	\hfill
+	\begin{subfigure}[t]{0.32\textwidth}   
 		\centering 
-		%\includegraphics[width=\textwidth]{Example-Image}
+		\includegraphics[width=\textwidth]{img/snake_end.png}
+		\caption{End screen of a game of Pong, with custom restart message.}
 		\label{sc3}
 	\end{subfigure}
-	\quad
-	\begin{subfigure}[b]{0.475\textwidth}   
+	\vskip\baselineskip
+	{\hfill
+	\begin{subfigure}[t]{0.32\textwidth}   
 		\centering 
-		%\includegraphics[width=\textwidth]{Example-Image}
+		\includegraphics[width=\textwidth]{img/pong_gameplay}
+		\caption{Playing a game of Pong.}
 		\label{fig:sc4}
 	\end{subfigure}
+	\quad
+	\begin{subfigure}[t]{0.32\textwidth}   
+		\centering 
+		\includegraphics[width=\textwidth]{img/pong_end.png}
+		\caption{End screen of a game of Pong, with custom restart message.}
+		\label{fig:sc5}
+	\end{subfigure}
+	\hfill}
 	\caption{Screenshots from the games we implemented.} 
 	\label{fig:screenshots}
 \end{figure*}
-
 
 \section{Strengths and Weaknesses}
 \label{sec:evaluation}
 As building a good DSL is partially an art, there is no construction which is optimal from all points of view.
 In our DSL, simplicity and clarity were privileged, meaning performance is not always optimal.
 Where these two goals were conflicting, the cleanest solution was chosen, unless there was a real performance bottleneck.
-An example of this is the use of functional programming where applicable, since immutable states brings some guarantees one cannot expect to have when using mutable state.
+An example of this is the use of functional programming where applicable, since immutable state brings some guarantees one cannot expect to have when using mutable state.
 
 According to this logic, there is no clear way to define strengths and weaknesses, as every end-user will have different requirements.
 Since the goal is not to write an API to build a snake game, our code is not always as short as it could be, and writing a game with it still requires some boilerplate code.
-This, however, is by design, as our DSL should also be usable by someone wanting to write a game such a Pong or Tetris.
-In fact, to demonstrate this versatility, we decided to also write Pong with our DSL.
+This, however, is by design, as our DSL should also be usable by someone wanting to write a game such another game such as Tetris.
 
 On the other hand, due to the constraints of the project, we were not able to use external libraries, which made it impossible to deal with type erasure (which itself is a consequence of the JVM and the goal of Scala developers to maintain interoperability with Java).
 Due to this, several parts of the code are not as clean as one would like them to be, however this complexity is mostly hidden from the end user.
 A possible solution is explored in Section~\ref{sec:improvements}.
+
+Finally, a major strength of our DSL is the extent to which we tested it.
+With over 300 lines of tests of various different scenarios that could occur in game development, there is little chance of bugs persisting in the code of the DSL.
+End-users worried about correctness thus should not be scared.
 
 \section{Further Improvements}
 \label{sec:improvements}
@@ -272,10 +314,11 @@ One other point which could be improved is avoiding type erasure, which can be d
 However, as mentioned in Section~\ref{sec:evaluation}, this requires additional imports which are not allowed in the context of this project.
 Another solution would be to use wrapper classes, but this quickly becomes very ugly when it has to be used more often.
 
-Finally, there are definitely ways to further improve the coding style, as both authors are relatively new to Scala.
-Doing so might improve performance and readability in some scenarios.
+Next, as this is only a proof-of-concept, there could be more functionalities based around making games look good.
+While aesthetics were taken into account when designing our DSL (by allowing control over color, stroke width, and even font of text), there are several points where this could further be improved, despite the limitations imposed by Scala.js.
 
-%TODO complete
+Finally, there are definitely ways to further improve the coding style, as both authors are relatively new to Scala.
+Doing so might improve performance and/or readability in some scenarios, and improve generalization to other games.
 
 \section{Conclusion}
 Writing a domain-specific language is not a simple task, and there is no solution which is optimal in all aspects.
@@ -283,8 +326,6 @@ When writing simple, browser-based games, performance is often not an issue, and
 For this purpose, we designed the DUBRAY/SCHAUS DSL in Scala, which makes this task easier.
 
 Two games were implemented using our DSL, though many other options are possible: Snake, and Pong.
-This shows that our DSL does make the task of writing a simple game in Scala easier.
-
-% TODO complete
+This shows that our DSL does make the task of writing a simple game in Scala easier, yet is not simply an API for one single type of game.
 
 \end{document}
