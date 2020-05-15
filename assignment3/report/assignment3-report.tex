@@ -166,7 +166,7 @@ case class ArrayMapper(i: Int) {
 }
 def apply(i: Int): ArrayMapper = ArrayMapper(i)
 \end{minted}
-With this, elements of the grid can be accessed as such: \scala{grid(i)(j)}.
+With this, elements of the grid can be accessed as such: \scala{grid.spots(i)(j)}.
 
 \subsubsection{Closures}
 Writing functional code is often simplified by the use of closures, as in the following example, which occurs when generalizing the \scala{GameLauncher} to work with all games.
